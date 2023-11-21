@@ -77,7 +77,7 @@ names(pca_res)
 
 ### Kümülatif oran grafiği
 
-Bu grafikte bütün mikropların sahip olduğu varyasyon 3 eksene indirgenmektedir. Elde edilen ilk 3 eksen bütün veri setine sahip olan varyasyonun büyük kısmını içermektedir.
+Bu grafikte bütün mikropların sahip olduğu varyasyon 3 eksene indirgenmektedir. Elde edilen ilk 3 eksen bütün veri setine sahip olan varyasyonun büyük kısmını içermektedir. Ve eksenlerdeki varyasyon oranları, eklemeli olarak ilerlemektedir. Bu kümülatif varyasyondur.
 
 "Standart sapma" princomp bileşeni; sdev
 
