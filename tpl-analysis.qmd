@@ -122,3 +122,33 @@ Uyarı: Bu noktada veri sütunlar ile metadata içerisindeki örnek bilgisinin a
 ```{r}
 plot(pca_res$x[,2], pca_res$x[,3], col=as.factor(metadata$Tissue))
 ```
+
+## Bray Curtis Analizi
+
+```{r}
+library("vegan")
+bray_curtis_dist <- vegan::vegdist(t(veri), method = "bray")
+```
+
+```{r}
+bray_curtis_pcoa <- ecodist::pco(bray_curtis_dist)
+```
+
+```{r}
+bray_curtis_pcoa_df <- data.frame(pcoa1 = bray_curtis_pcoa$vectors[,1], 
+                                  pcoa2 = bray_curtis_pcoa$vectors[,2])
+```
+
+```{r}
+library("ggplot2")
+bray_curtis_plot <- ggplot(data = bray_curtis_pcoa_df, aes(x=pcoa1, y=pcoa2)) +
+  geom_point() +
+  labs(x = "PC1",
+       y = "PC2", 
+       title = "Bray-Curtis PCoA") +
+  theme(title = element_text(size = 10)) # makes titles smaller
+```
+
+```{r}
+bray_curtis_plot
+```
