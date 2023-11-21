@@ -1,0 +1,143 @@
+---
+title: "TPL Veri Analizi"
+author: "Nursena Kocatürk"
+format: html
+editor: visual
+---
+
+# Giriş
+
+Bu dökümanda tpl veri analizi adımları dökümante edilecektir.
+
+# Yöntemler
+
+## Veri yükleme
+
+Veri şu şekilde yüklenmektedir:
+
+```{r}
+veri <- read.table(file = "data/krakenuniq_abundance_matrix.txt", header = T, sep = "\t")
+```
+
+Verinin boyutu
+
+```{r}
+dim(veri)
+```
+
+
+Mikrobiyal mutlak çokluk matrisini, okuma derinliğine göre normalize edelim.
+
+İlk olarak, bütun sutunların toplam değerlerini elde edleim. Bu bize her örnekten elde edilen fastq dosyaının okuma derinliğini verecektir
+
+```{r}
+read_depth <- colSums(veri)
+```
+
+Kütüphanelerin sahip oldukların okuma derinliklerini bakalım:
+
+
+```{r fig.cap = "Read depth values of the tested fastq files (million reads)"}
+barplot(read_depth/10^6, axisnames = FALSE, ylab = "Read Depth (million reads)", xlab="Fastq Files")
+```
+
+Derinlikler aynı değil. O yüzden, çokluk tablosunu, toplam okuma derinliğine göre normalize edelim:
+
+```{r}
+veri <- scale(veri,center = F, scale = colSums(veri))
+```
+
+## PCA 
+
+Veriyi transpoze edelim
+
+```{r}
+veri_t <- t(veri)
+```
+
+PCA, boyutsallık azaltma yapmak için kullanılan yaklaşımlardan biridir.Verilen matris üzerinde PCA gerçekleştirir ve sonuçlar 'prcomp' sınıfının nesnesi olarak döndürür
+
+
+```{r}
+pca_res <- prcomp(veri)
+```
+
+Prcomp sonuç nesnesinin özeti;
+
+```{r}
+summary(pca_res)
+```
+
+Sonuç nesnesindeki değişkenlerin adı;
+
+sdev; temel bileşenlerin standart sapmaları
+rotation; değişken yüklemelerin matrisi (yani sütunları özvektörleri içeren bir matris)
+x; retx doğruysa, döndürülen verilerin değeri veriler, döndürme matrisiyle döndürülür. 
+center, scale; kullanılan ortalama ve ölçeklendirme veya YANLIŞ.
+
+```{r}
+names(pca_res)
+```
+
+### Kümülatif oran grafiği
+
+Bu grafikte bütün mikropların sahip olduğu varyasyon 3 eksene indirgenmektedir.
+Elde edilen ilk 3 eksen bütün veri setine sahip olan varyasyonun büyük kısmını içermektedir.
+
+"Standart sapma" princomp bileşeni; sdev
+
+```{r}
+pca_res$sdev
+```
+
+Varyans standart sapmanın karesidir.
+
+```{r}
+pca_res$sdev^2
+```
+
+Varyans oranı, varyansın tüm varyansların toplamına bölünmesiyle elde edilir.
+
+```{r}
+pca_res$sdev^2 / sum(pca_res$sdev^2)
+```
+
+Ve Kümülatif Oran, varyans oranının kümülatif toplamıdır.
+
+```{r}
+cumsum(pca_res$sdev^2 / sum(pca_res$sdev^2))
+```
+
+Kümülatif varyans grafiği;
+
+```{r}
+plot(cumsum(pca_res$sdev^2 / sum(pca_res$sdev^2)), type="b", xlab="PC", ylab="Cumulative Proportion")
+```
+
+## Örneklerin doku bilgileri
+
+
+```{r}
+metadata <- read.table(file = "data/metadata.csv", header = T, sep = ";")
+```
+
+Uyarı: Bu noktada veri sütunlar ile metadata içerisindeki örnek bilgisinin aynı soırada oolması öneml,dir.
+
+## PCA analizini görselleştirme
+
+
+```{r}
+plot(pca_res$x[,2], pca_res$x[,3], col=as.factor(metadata$Tissue))
+```
+
+
+
+
+
+
+
+
+
+
+
+
