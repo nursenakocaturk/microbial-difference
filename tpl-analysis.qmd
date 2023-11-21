@@ -25,7 +25,6 @@ Verinin boyutu
 dim(veri)
 ```
 
-
 Mikrobiyal mutlak çokluk matrisini, okuma derinliğine göre normalize edelim.
 
 İlk olarak, bütun sutunların toplam değerlerini elde edleim. Bu bize her örnekten elde edilen fastq dosyaının okuma derinliğini verecektir
@@ -35,7 +34,6 @@ read_depth <- colSums(veri)
 ```
 
 Kütüphanelerin sahip oldukların okuma derinliklerini bakalım:
-
 
 ```{r fig.cap = "Read depth values of the tested fastq files (million reads)"}
 barplot(read_depth/10^6, axisnames = FALSE, ylab = "Read Depth (million reads)", xlab="Fastq Files")
@@ -47,7 +45,7 @@ Derinlikler aynı değil. O yüzden, çokluk tablosunu, toplam okuma derinliğin
 veri <- scale(veri,center = F, scale = colSums(veri))
 ```
 
-## PCA 
+## PCA
 
 Veriyi transpoze edelim
 
@@ -55,8 +53,9 @@ Veriyi transpoze edelim
 veri_t <- t(veri)
 ```
 
-PCA, boyutsallık azaltma yapmak için kullanılan yaklaşımlardan biridir.Verilen matris üzerinde PCA gerçekleştirir ve sonuçlar 'prcomp' sınıfının nesnesi olarak döndürür
+PCA, büyük boyutlu olan verileri küçük boyuta indirgemek için kullanılan yaklaşımlardan biridir. Bütün eksenler aynı anda görselleştirilemez. PCA, çok boyutlu veriyi alarak üç boyuta indirgemektedir. İlk üç eksen veri setinin sahip olduğu varyasyonun büyük bir kısmını içermektedir.
 
+Verilen matris üzerinde PCA gerçekleştirir ve sonuçlar 'prcomp' sınıfının nesnesi olarak döndürür.
 
 ```{r}
 pca_res <- prcomp(veri)
@@ -70,10 +69,7 @@ summary(pca_res)
 
 Sonuç nesnesindeki değişkenlerin adı;
 
-sdev; temel bileşenlerin standart sapmaları
-rotation; değişken yüklemelerin matrisi (yani sütunları özvektörleri içeren bir matris)
-x; retx doğruysa, döndürülen verilerin değeri veriler, döndürme matrisiyle döndürülür. 
-center, scale; kullanılan ortalama ve ölçeklendirme veya YANLIŞ.
+sdev; temel bileşenlerin standart sapmaları rotation; değişken yüklemelerin matrisi (yani sütunları özvektörleri içeren bir matris) x; retx doğruysa, döndürülen verilerin değeri veriler, döndürme matrisiyle döndürülür. center, scale; kullanılan ortalama ve ölçeklendirme veya YANLIŞ.
 
 ```{r}
 names(pca_res)
@@ -81,8 +77,7 @@ names(pca_res)
 
 ### Kümülatif oran grafiği
 
-Bu grafikte bütün mikropların sahip olduğu varyasyon 3 eksene indirgenmektedir.
-Elde edilen ilk 3 eksen bütün veri setine sahip olan varyasyonun büyük kısmını içermektedir.
+Bu grafikte bütün mikropların sahip olduğu varyasyon 3 eksene indirgenmektedir. Elde edilen ilk 3 eksen bütün veri setine sahip olan varyasyonun büyük kısmını içermektedir.
 
 "Standart sapma" princomp bileşeni; sdev
 
@@ -102,7 +97,7 @@ Varyans oranı, varyansın tüm varyansların toplamına bölünmesiyle elde edi
 pca_res$sdev^2 / sum(pca_res$sdev^2)
 ```
 
-Ve Kümülatif Oran, varyans oranının kümülatif toplamıdır.
+Kümülatif Oran, varyans oranının kümülatif toplamıdır.
 
 ```{r}
 cumsum(pca_res$sdev^2 / sum(pca_res$sdev^2))
@@ -116,7 +111,6 @@ plot(cumsum(pca_res$sdev^2 / sum(pca_res$sdev^2)), type="b", xlab="PC", ylab="Cu
 
 ## Örneklerin doku bilgileri
 
-
 ```{r}
 metadata <- read.table(file = "data/metadata.csv", header = T, sep = ";")
 ```
@@ -125,19 +119,6 @@ Uyarı: Bu noktada veri sütunlar ile metadata içerisindeki örnek bilgisinin a
 
 ## PCA analizini görselleştirme
 
-
 ```{r}
 plot(pca_res$x[,2], pca_res$x[,3], col=as.factor(metadata$Tissue))
 ```
-
-
-
-
-
-
-
-
-
-
-
-
