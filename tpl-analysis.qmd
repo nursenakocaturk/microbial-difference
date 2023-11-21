@@ -27,13 +27,13 @@ dim(veri)
 
 Mikrobiyal mutlak çokluk matrisini, okuma derinliğine göre normalize edelim.
 
-İlk olarak, bütun sutunların toplam değerlerini elde edleim. Bu bize her örnekten elde edilen fastq dosyaının okuma derinliğini verecektir
+İlk olarak, bütun sutunların toplam değerlerini elde edelim. Bu bize her örnekten elde edilen fastq dosyaının okuma derinliğini verecektir
 
 ```{r}
 read_depth <- colSums(veri)
 ```
 
-Kütüphanelerin sahip oldukların okuma derinliklerini bakalım:
+Kütüphanelerin sahip oldukları okuma derinliklerine bakalım:
 
 ```{r fig.cap = "Read depth values of the tested fastq files (million reads)"}
 barplot(read_depth/10^6, axisnames = FALSE, ylab = "Read Depth (million reads)", xlab="Fastq Files")
@@ -69,7 +69,7 @@ summary(pca_res)
 
 Sonuç nesnesindeki değişkenlerin adı;
 
-sdev; temel bileşenlerin standart sapmaları rotation; değişken yüklemelerin matrisi (yani sütunları özvektörleri içeren bir matris) x; retx doğruysa, döndürülen verilerin değeri veriler, döndürme matrisiyle döndürülür. center, scale; kullanılan ortalama ve ölçeklendirme veya YANLIŞ.
+sdev; temel bileşenlerin standart sapmaları. rotation; değişken yüklemelerin matrisi (yani sütunları özvektörleri içeren bir matris) x; retx doğruysa, döndürülen verilerin değeri veriler, döndürme matrisiyle döndürülür. center, scale; kullanılan ortalama ve ölçeklendirme veya YANLIŞ.
 
 ```{r}
 names(pca_res)
@@ -97,7 +97,7 @@ Varyans oranı, varyansın tüm varyansların toplamına bölünmesiyle elde edi
 pca_res$sdev^2 / sum(pca_res$sdev^2)
 ```
 
-Kümülatif Oran, varyans oranının kümülatif toplamıdır.
+Kümülatif oran, varyans oranının kümülatif toplamıdır.
 
 ```{r}
 cumsum(pca_res$sdev^2 / sum(pca_res$sdev^2))
@@ -115,7 +115,7 @@ plot(cumsum(pca_res$sdev^2 / sum(pca_res$sdev^2)), type="b", xlab="PC", ylab="Cu
 metadata <- read.table(file = "data/metadata.csv", header = T, sep = ";")
 ```
 
-Uyarı: Bu noktada veri sütunlar ile metadata içerisindeki örnek bilgisinin aynı soırada oolması öneml,dir.
+Uyarı: Bu noktada veri sütunlar ile metadata içerisindeki örnek bilgisinin aynı sırada olması önemlidir.
 
 ## PCA analizini görselleştirme
 
