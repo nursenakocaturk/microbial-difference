@@ -11,75 +11,101 @@ Bu dökümanda tpl veri analizi adımları dökümante edilecektir.
 
 # Yöntemler
 
+## Kütüphaneler
+
+Çalışmamızda aşağıda belirtilen kütüphaneler kullanılmaktadır. Örneklerin sahip oldukları Bray-Curtis uzaklıkları `vegan` kütüphanesi ile hesaplanmaktadır. Elde edilen Bray-Curtis uzaklık matrisi, daha sonra `ecodist` kütüphanesi içerisinde bulunan `pcoa` komutu ile öz bileşenlerine ayrılmaktadır.
+
+```{r}
+library(vegan)
+library(ggplot2)
+library(ecodist)
+```
+
 ## Veri yükleme
 
-Veri şu şekilde yüklenmektedir:
+Çalışmalarda kullanılacak mutlak çokluk verisi aşağıdaki gibi yüklenmektedir:
 
 ```{r}
 veri <- read.table(file = "data/krakenuniq_abundance_matrix.txt", header = T, sep = "\t")
 ```
 
-Verinin boyutu
+Çalışma kapsamında toplam olarak `r `ncol(veri)` kadar örnek ve `r `nrow(veri)` kadar mikroorganizma bulunmaktadır:
 
 ```{r}
 dim(veri)
 ```
+Şimdi de, örneklerin sahip oldukları doku bilgilerini yükleyelim:
 
-Mikrobiyal mutlak çokluk matrisini, okuma derinliğine göre normalize edelim.
+```{r}
+metadata <- read.table(file = "data/metadata.csv", header = T, sep = ";")
+```
 
-İlk olarak, bütun sutunların toplam değerlerini elde edelim. Bu bize her örnekten elde edilen fastq dosyaının okuma derinliğini verecektir
+Uyarı: Bu noktada veri sütunlar ile metadata içerisindeki örnek bilgisinin aynı sırada olması önemlidir.
+
+Her dokuya ait kaç tane örnek var acaba?
+
+```{r}
+table(metadata$Tissue)
+```
+
+## Veri normalizasyonu
+
+Elimizdeki mikrobiyal çokluk matrisini öncelikle normalize etmemiz gereklidir. Çünkü her DNA kütüphanesi farklı okuma derinliğine (toplam okuma sayısı) sahiptir. 
+
+İlk olarak, bütun sutunların (yani her örneğin) toplam değerlerini elde edelim. Bu bize her örnekten elde edilen fastq dosyaının okuma derinliğini verecektir
 
 ```{r}
 read_depth <- colSums(veri)
 ```
 
-Kütüphanelerin sahip oldukları okuma derinliklerine bakalım:
+Şimdi de fastq dosyalarının sahip oldukları okuma derinliklerini görselleştirelim:
 
 ```{r fig.cap = "Read depth values of the tested fastq files (million reads)"}
 barplot(read_depth/10^6, axisnames = FALSE, ylab = "Read Depth (million reads)", xlab="Fastq Files")
 ```
 
-Derinlikler aynı değil. O yüzden, çokluk tablosunu, toplam okuma derinliğine göre normalize edelim:
+Derinlikler aynı değil. O yüzden, çokluk tablosunu, toplam okuma derinliğine göre normalize edersek, daha iyi bir karşılaştırma yapabiliriz.
 
 ```{r}
 veri <- scale(veri,center = F, scale = colSums(veri))
 ```
 
-## PCA
-
-Veriyi transpoze edelim
-
-```{r}
-veri_t <- t(veri)
-```
+## Birincil öz bileşen tahlili (PCA)
 
 PCA, büyük boyutlu olan verileri küçük boyuta indirgemek için kullanılan yaklaşımlardan biridir. Bütün eksenler aynı anda görselleştirilemez. PCA, çok boyutlu veriyi alarak üç boyuta indirgemektedir. İlk üç eksen veri setinin sahip olduğu varyasyonun büyük bir kısmını içermektedir.
 
-Verilen matris üzerinde PCA gerçekleştirir ve sonuçlar 'prcomp' sınıfının nesnesi olarak döndürür.
+Verilen matris üzerinde PCA gerçekleştirir ve sonuçlar `prcomp` sınıfının nesnesi olarak döndürür.
+
+Burada önemli olan nokta, veriyi transpoze etmemiz. Yani satırları sütün, sütunları ise satır yapıyoruz.
 
 ```{r}
-pca_res <- prcomp(veri)
+pca_res <- prcomp(t(veri))
 ```
 
-Prcomp sonuç nesnesinin özeti;
+Prcomp sonuç nesnesinin özeti:
 
 ```{r}
 summary(pca_res)
 ```
 
-Sonuç nesnesindeki değişkenlerin adı;
+Sonuç nesnesindeki değişkenlerin adı:
 
-sdev; temel bileşenlerin standart sapmaları. rotation; değişken yüklemelerin matrisi (yani sütunları özvektörleri içeren bir matris) x; retx doğruysa, döndürülen verilerin değeri veriler, döndürme matrisiyle döndürülür. center, scale; kullanılan ortalama ve ölçeklendirme veya YANLIŞ.
++ sdev; temel bileşenlerin standart sapmaları
++ rotation; değişken yüklemelerin matrisi (yani sütunları özvektörleri içeren bir matris) x
++ retx doğruysa, döndürülen verilerin değeri veriler, döndürme matrisiyle döndürülür. 
++ center, scale; kullanılan ortalama ve ölçeklendirme veya YANLIŞ.
 
 ```{r}
 names(pca_res)
 ```
 
-### Kümülatif oran grafiği
+### Kümülatif varyasyon grafiği
 
 Bu grafikte bütün mikropların sahip olduğu varyasyon 3 eksene indirgenmektedir. Elde edilen ilk 3 eksen bütün veri setine sahip olan varyasyonun büyük kısmını içermektedir. Ve eksenlerdeki varyasyon oranları, eklemeli olarak ilerlemektedir. Bu kümülatif varyasyondur.
 
-"Standart sapma" princomp bileşeni; sdev
+Bu varyasyon değerini hesaplamak için şu adımları uygulayabiliriz:
+
+**Standart sapma** `princomp` bileşeni; sdev
 
 ```{r}
 pca_res$sdev
@@ -109,46 +135,80 @@ Kümülatif varyans grafiği;
 plot(cumsum(pca_res$sdev^2 / sum(pca_res$sdev^2)), type="b", xlab="PC", ylab="Cumulative Proportion")
 ```
 
-## Örneklerin doku bilgileri
-
-```{r}
-metadata <- read.table(file = "data/metadata.csv", header = T, sep = ";")
-```
-
-Uyarı: Bu noktada veri sütunlar ile metadata içerisindeki örnek bilgisinin aynı sırada olması önemlidir.
-
 ## PCA analizini görselleştirme
 
+Bu adımda ise PCA analizini görselleştirelim. Bizim için önemli olan ilk üç eksen. Dolayısıyla, öncelikle ilk üç eksendeki değerleri `pca_res` içerisinden alalım. Ayrıca, örneklerin doku bilgilerini de elde edelim. Bu sayede, grafikleki noktaları, örneklerin doku bilgilerine göre boyayabiliriz.
+
 ```{r}
-plot(pca_res$x[,2], pca_res$x[,3], col=as.factor(metadata$Tissue))
+PC_data <- data.frame(PC1=pca_res$x[,1],
+                      PC2=pca_res$x[,2],
+                      PC3=pca_res$x[,3],
+                      Tissue=metadata$Tissue)
+```
+
+Şimdi de `ggplot2` ile görselleştirme yapalım. Önce PC1 ve PC2:
+
+```{r}
+ggplot(data = PC_data, aes(x=PC1, y=PC2, color=Tissue)) + geom_point()
+```
+
+Şimdi de PC1 ve PC3:
+
+```{r}
+ggplot(data = PC_data, aes(x=PC1, y=PC3, color=Tissue)) + geom_point()
+```
+
+Son olarak PC2 ve PC3:
+
+```{r}
+ggplot(data = PC_data, aes(x=PC2, y=PC3, color=Tissue)) + geom_point()
 ```
 
 ## Bray Curtis Analizi
 
-```{r}
-library("vegan")
-bray_curtis_dist <- vegan::vegdist(t(veri), method = "bray")
-```
+Bu adımda ise, örneklerin sahip oldukları mikrobiyal uzaklıkları hesaplayarak, elde edilen uzaklık matrisini görselleştirelim.
+
+Önce Bray-Curtis ekolojik uzaklığını elde edelim:
 
 ```{r}
-bray_curtis_pcoa <- ecodist::pco(bray_curtis_dist)
+bray_curtis_dist <- vegdist(t(veri), method = "bray")
 ```
 
-```{r}
-bray_curtis_pcoa_df <- data.frame(pcoa1 = bray_curtis_pcoa$vectors[,1], 
-                                  pcoa2 = bray_curtis_pcoa$vectors[,2])
-```
+Sonra, `pco` ile bu uzaklık matrisinin öz bileşenlerine ayıralım:
 
 ```{r}
-library("ggplot2")
-bray_curtis_plot <- ggplot(data = bray_curtis_pcoa_df, aes(x=pcoa1, y=pcoa2)) +
+bray_curtis_pcoa <- pco(bray_curtis_dist)
+```
+
+Aynı şekilde, bizim için önemli olan eksenleri ve doku bilgisini alalım.
+
+```{r}
+bray_curtis_pcoa_df <- data.frame(PCOA1 = bray_curtis_pcoa$vectors[,1], 
+                                  PCOA2 = bray_curtis_pcoa$vectors[,2],
+                                  PCOA3 = bray_curtis_pcoa$vectors[,3],
+                                  Tissue = metadata$Tissue)
+```
+
+Önce PC1 ve PC2 eksenlerini inceleyelim:
+
+```{r}
+ggplot(data = bray_curtis_pcoa_df, aes(x=PCOA1, y=PCOA2, color=Tissue)) +
   geom_point() +
-  labs(x = "PC1",
-       y = "PC2", 
-       title = "Bray-Curtis PCoA") +
-  theme(title = element_text(size = 10)) # makes titles smaller
+  labs(title = "Bray-Curtis PCoA")
 ```
 
+Sonra PC1 ve PC3 eksenlerini inceleyelim:
+
 ```{r}
-bray_curtis_plot
+ggplot(data = bray_curtis_pcoa_df, aes(x=PCOA1, y=PCOA3, color=Tissue)) +
+  geom_point() +
+  labs(title = "Bray-Curtis PCoA")
+```
+
+Önce PC2 ve PC3 eksenlerini inceleyelim:
+
+```{r}
+ggplot(data = bray_curtis_pcoa_df, aes(x=PCOA2, y=PCOA3, color=Tissue)) +
+  geom_point() +
+  labs(title = "Bray-Curtis PCoA")
 ```
