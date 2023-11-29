@@ -29,11 +29,12 @@ library(ecodist)
 veri <- read.table(file = "data/krakenuniq_abundance_matrix.txt", header = T, sep = "\t")
 ```
 
-Çalışma kapsamında toplam olarak `r `ncol(veri)` kadar örnek ve `r `nrow(veri)` kadar mikroorganizma bulunmaktadır:
+Çalışma kapsamında toplam olarak `r ncol(veri)`kadar örnek ve`r nrow(veri)` kadar mikroorganizma bulunmaktadır:
 
 ```{r}
 dim(veri)
 ```
+
 Şimdi de, örneklerin sahip oldukları doku bilgilerini yükleyelim:
 
 ```{r}
@@ -48,9 +49,15 @@ Her dokuya ait kaç tane örnek var acaba?
 table(metadata$Tissue)
 ```
 
+Dentin ve cementum farkını gösteren bir grafik oluşturalım.
+
+```{r}
+ggplot(data = metadata, aes(x = Sample, y = Tissue)) + geom_boxplot()
+```
+
 ## Veri normalizasyonu
 
-Elimizdeki mikrobiyal çokluk matrisini öncelikle normalize etmemiz gereklidir. Çünkü her DNA kütüphanesi farklı okuma derinliğine (toplam okuma sayısı) sahiptir. 
+Elimizdeki mikrobiyal çokluk matrisini öncelikle normalize etmemiz gereklidir. Çünkü her DNA kütüphanesi farklı okuma derinliğine (toplam okuma sayısı) sahiptir.
 
 İlk olarak, bütun sutunların (yani her örneğin) toplam değerlerini elde edelim. Bu bize her örnekten elde edilen fastq dosyaının okuma derinliğini verecektir
 
@@ -90,10 +97,10 @@ summary(pca_res)
 
 Sonuç nesnesindeki değişkenlerin adı:
 
-+ sdev; temel bileşenlerin standart sapmaları
-+ rotation; değişken yüklemelerin matrisi (yani sütunları özvektörleri içeren bir matris) x
-+ retx doğruysa, döndürülen verilerin değeri veriler, döndürme matrisiyle döndürülür. 
-+ center, scale; kullanılan ortalama ve ölçeklendirme veya YANLIŞ.
+-   sdev; temel bileşenlerin standart sapmaları
+-   rotation; değişken yüklemelerin matrisi (yani sütunları özvektörleri içeren bir matris) x
+-   retx doğruysa, döndürülen verilerin değeri veriler, döndürme matrisiyle döndürülür.
+-   center, scale; kullanılan ortalama ve ölçeklendirme veya YANLIŞ.
 
 ```{r}
 names(pca_res)
