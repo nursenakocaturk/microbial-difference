@@ -52,7 +52,7 @@ table(metadata$Tissue)
 Dentin ve cementum farkını gösteren bir grafik oluşturalım.
 
 ```{r}
-ggplot(data = metadata, aes(x = Sample, y = Tissue)) + geom_boxplot()
+ggplot(data = data, aes(x = Tissue, y = Number.of.species)) + geom_boxplot()
 ```
 
 ## Veri normalizasyonu
