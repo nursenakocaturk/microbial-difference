@@ -173,7 +173,16 @@ ggplot(data = PC_data, aes(x=PC2, y=PC3, color=Tissue)) + geom_point()
 
 ## Bray Curtis Analizi
 
-Bu adımda ise, örneklerin sahip oldukları mikrobiyal uzaklıkları hesaplayarak, elde edilen uzaklık matrisini görselleştirelim.
+Bray curtis analizi, iki farklı bölge arasındaki tür popülasyonlarındaki farklılıkları ölçmek için kullanılır. 
+
+Aynı veya farklı dokudan gelen örnekler; aynı dokuysa benzer türlere, farklı dokuysa farklı türlere sahiptir. İki örnek fazla ortak türe sahipse bunlar benzerdir. Ve iki farklı örnek ne kadar fazla ortak tür taşıyorsa o kadar düşük bray curtis uzaklığına sahiptir. 
+
+Bray curtis uzaklğı 0 ile 1 arasındadır. 
+
++ 0 ise iki örnek aynı türü taşıyordur.
++ 1, örnekler hiçbir tür paylaşmamaktadır. 
+
+Bu adımda, örneklerin sahip oldukları mikrobiyal uzaklıkları hesaplayarak, elde edilen uzaklık matrisini görselleştirelim.
 
 Önce Bray-Curtis ekolojik uzaklığını elde edelim:
 
