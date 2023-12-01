@@ -228,3 +228,21 @@ ggplot(data = bray_curtis_pcoa_df, aes(x=PCOA2, y=PCOA3, color=Tissue)) +
   geom_point() +
   labs(title = "Bray-Curtis PCoA")
 ```
+
+## Alfa Çeşitliliği
+
+Alfa çeşitliliği, tek bir örnekteki tür çeşitliliğini ölçer. 
+
+### Alfa Çeşitliliği istatistikleri
+
++ Shannon, rastgele seçilmiş bir bireyin kimlik tahmini
++ Simpson, rastgele seçilen iki bireyin aynı tür olma olasılığı
++ Ters simpson, türlerin ortalama orantılı bolluğunu ölçmek için ağırlıklı aritmetik ortalama kullanıldığında elde edilen etkin tür sayısına eşittir. 
+
+
+
+
+
+
+
+
