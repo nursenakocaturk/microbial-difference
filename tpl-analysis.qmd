@@ -239,6 +239,13 @@ Alfa çeşitliliği, tek bir örnekteki tür çeşitliliğini ölçer.
 + Simpson, rastgele seçilen iki bireyin aynı tür olma olasılığı
 + Ters simpson, türlerin ortalama orantılı bolluğunu ölçmek için ağırlıklı aritmetik ortalama kullanıldığında elde edilen etkin tür sayısına eşittir. 
 
+Simpson indeksi, 0 ile 1 arasındadır. Ters simpson indeksi, sıfırdan büyüktür. Ayrıca ters simpson indeksi, daha yüksek çeşitlilik değerlerini daha fazla yayma eğilimindedir.
+
+Vegan, biyolojik çeşitlilik istatistiklerini hesaplamak için kullanılan bir araç setidir.
+
+```{r}
+library("vegan")
+```
 
 
 
