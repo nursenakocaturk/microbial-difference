@@ -5,3 +5,33 @@ date: "2023-12-10"
 output: html_document
 ---
 
+```{r}
+library("readr")
+library("dplyr")
+library("taxa")
+library("metacoder")
+library("vegan")
+```
+
+```{r}
+otu_data <- read_tsv("data/krakenuniq_abundance_matrix.txt")
+
+print(otu_data)
+```
+
+
+```{r}
+tax_data <- read_tsv("data/data.csv")
+
+print(tax_data)
+```
+
+```{r}
+tail(colnames(otu_data), n = 10)
+```
+
+```{r}
+sample_data <- read_tsv("data/metadata.csv",
+                        col_types = "cccccccccccccccc")
+print(sample_data)
+```
