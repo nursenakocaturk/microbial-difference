@@ -173,14 +173,14 @@ ggplot(data = PC_data, aes(x=PC2, y=PC3, color=Tissue)) + geom_point()
 
 ## Bray Curtis Analizi
 
-Bray curtis analizi, iki farklı bölge arasındaki tür popülasyonlarındaki farklılıkları ölçmek için kullanılır. 
+Bray curtis analizi, iki farklı bölge arasındaki tür popülasyonlarındaki farklılıkları ölçmek için kullanılır.
 
-Aynı veya farklı dokudan gelen örnekler; aynı dokuysa benzer türlere, farklı dokuysa farklı türlere sahiptir. İki örnek fazla ortak türe sahipse bunlar benzerdir. Ve iki farklı örnek ne kadar fazla ortak tür taşıyorsa o kadar düşük bray curtis uzaklığına sahiptir. 
+Aynı veya farklı dokudan gelen örnekler; aynı dokuysa benzer türlere, farklı dokuysa farklı türlere sahiptir. İki örnek fazla ortak türe sahipse bunlar benzerdir. Ve iki farklı örnek ne kadar fazla ortak tür taşıyorsa o kadar düşük bray curtis uzaklığına sahiptir.
 
-Bray curtis uzaklğı 0 ile 1 arasındadır. 
+Bray curtis uzaklğı 0 ile 1 arasındadır.
 
-+ 0 ise iki örnek aynı türü taşıyordur.
-+ 1, örnekler hiçbir tür paylaşmamaktadır. 
+-   0 ise iki örnek aynı türü taşıyordur.
+-   1, örnekler hiçbir tür paylaşmamaktadır.
 
 Bu adımda, örneklerin sahip oldukları mikrobiyal uzaklıkları hesaplayarak, elde edilen uzaklık matrisini görselleştirelim.
 
@@ -231,13 +231,13 @@ ggplot(data = bray_curtis_pcoa_df, aes(x=PCOA2, y=PCOA3, color=Tissue)) +
 
 ## Alfa Çeşitliliği
 
-Alfa çeşitliliği, tek bir örnekteki tür çeşitliliğini ölçer. 
+Alfa çeşitliliği, tek bir örnekteki tür çeşitliliğini ölçer.
 
 ### Alfa Çeşitliliği istatistikleri
 
-+ Shannon, rastgele seçilmiş bir bireyin kimlik tahmini
-+ Simpson, rastgele seçilen iki bireyin aynı tür olma olasılığı
-+ Ters simpson, türlerin ortalama orantılı bolluğunu ölçmek için ağırlıklı aritmetik ortalama kullanıldığında elde edilen etkin tür sayısına eşittir. 
+-   Shannon, rastgele seçilmiş bir bireyin kimlik tahmini
+-   Simpson, rastgele seçilen iki bireyin aynı tür olma olasılığı
+-   Ters simpson, türlerin ortalama orantılı bolluğunu ölçmek için ağırlıklı aritmetik ortalama kullanıldığında elde edilen etkin tür sayısına eşittir.
 
 Simpson indeksi, 0 ile 1 arasındadır. Ters simpson indeksi, sıfırdan büyüktür. Ayrıca ters simpson indeksi, daha yüksek çeşitlilik değerlerini daha fazla yayma eğilimindedir.
 
@@ -246,10 +246,3 @@ Vegan, biyolojik çeşitlilik istatistiklerini hesaplamak için kullanılan bir 
 ```{r}
 library("vegan")
 ```
-
-
-
-
-
-
-
