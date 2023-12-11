@@ -13,25 +13,54 @@ library("metacoder")
 library("vegan")
 ```
 
-```{r}
-otu_data <- read_tsv("data/krakenuniq_abundance_matrix.txt")
 
-print(otu_data)
+```{r}
+otu_data <- read.table("data/krakenuniq_abundance_matrix.txt", header = T, sep = "\t")
+
+write.table(
+  x = data.frame(OTU_ID = seq(1,nrow(otu_data)), 
+                 Species = rownames(otu_data)), 
+  file = "data/otu_metadata.txt", quote = F, row.names = F, sep = "\t")
+
+rownames(otu_data) <- seq(1,nrow(otu_data))
+#otu_data$OTU_ID <- seq(1,nrow(otu_data))
+otu_data <- as_tibble(cbind(OTU_ID = seq(1,nrow(otu_data)), otu_data))
 ```
 
 
 ```{r}
-tax_data <- read_tsv("data/data.csv")
-
-print(tax_data)
+tax_data <- read_tsv("data/otu_metadata.txt")
 ```
 
 ```{r}
-tail(colnames(otu_data), n = 10)
-```
-
-```{r}
-sample_data <- read_tsv("data/metadata.csv",
-                        col_types = "cccccccccccccccc")
+sample_data <- read_csv2("data/metadata.csv")
 print(sample_data)
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
