@@ -34,33 +34,58 @@ tax_data <- read_tsv("data/otu_metadata.txt")
 
 ```{r}
 sample_data <- read_csv2("data/metadata.csv")
-print(sample_data)
+```
+
+```{r}
+tax_data$OTU_ID <- as.character(tax_data$OTU_ID)
+otu_data$OTU_ID <- as.character(otu_data$OTU_ID) 
+otu_data <- left_join(otu_data, tax_data,
+                      by = c("OTU_ID" = "OTU_ID")) 
+print(otu_data)
+```
+
+
+```{r}
+
+obj <- parse_tax_data(otu_data,
+                      class_cols = "Species", 
+                      class_sep = ";") 
+print(obj)
+```
+
+```{r}
+print(obj$data$tax_data)
+```
+
+```{r}
+names(obj$data) <- "otu_counts"
+#print(obj)
 ```
 
 
 
+```{r}
+obj$data$otu_counts <- obj$data$tax_data[c("taxon_id", "OTU_ID", sample_data$Sample)]
+```
+
+```{r}
+print(obj)
+```
 
 
+```{r}
+names(obj$data) <- "otu_counts"
+print(obj)
+```
 
 
+```{r}
+head(all_names(obj), 20)
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```{r}
+length(all_names(obj))
+```
 
 
 
