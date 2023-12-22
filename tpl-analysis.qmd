@@ -231,15 +231,33 @@ ggplot(data = bray_curtis_pcoa_df, aes(x=PCOA2, y=PCOA3, color=Tissue)) +
 
 ## Alfa Çeşitliliği
 
-Alfa çeşitliliği, tek bir örnekteki tür çeşitliliğini ölçer.
+Alfa çeşitliliği, tek bir örnekteki tür çeşitliliğini ölçer. İncelenen farklı tür sayısına göre, tek bir örneğin çeşitliliğini ölçer.  
 
 ### Alfa Çeşitliliği istatistikleri
 
--   Shannon, rastgele seçilmiş bir bireyin kimlik tahmini
--   Simpson, rastgele seçilen iki bireyin aynı tür olma olasılığı
--   Ters simpson, türlerin ortalama orantılı bolluğunu ölçmek için ağırlıklı aritmetik ortalama kullanıldığında elde edilen etkin tür sayısına eşittir.
+#### Shannon indeksi
 
-Simpson indeksi, 0 ile 1 arasındadır. Ters simpson indeksi, sıfırdan büyüktür. Ayrıca ters simpson indeksi, daha yüksek çeşitlilik değerlerini daha fazla yayma eğilimindedir.
++ Rastgele seçilmiş bir bireyin kimlik tahmini
+
++ Dizilerdeki entropiyi (değişkenin olası sonuçlarına özgü bilgi ve belirsizliğin ortalama düzeyidir) ölçmektedir. 
+
++ İncelenen dizide ne kadar fazla tür gözlemlenirse ve bolluklar ne kadar eşit olursa, diğer okumaya bakıldığında bir sonraki adımda hangi türün gözlemleneceğini tahmin etmek o kadar zordur.
+
++ Shannon entropisi bu tahminle ilişkili belirsizliği ölçer.
+
+#### Simpson indeksi
+
++ Rastgele seçilen iki bireyin aynı tür olma olasılığı
+
++ Örnekten rastgele alınan iki varlığın (mikroplar veya okumalar) farklı türde olma olasılığına dayanır.
+
++ Olasılık olduğu için 0 ile 1 arasında değişmektedir.
+
+#### Ters simpson indeksi
+
++ İlgilenilen veri kümesindeki türlerin ortalama orantılı bolluğunu ölçmek için ağırlıklı aritmetik ortalama kullanıldığında elde edilen etkin tür sayısına eşittir.
+
++ Ters simpson indeksi, sıfırdan büyüktür. Ayrıca ters simpson indeksi, daha yüksek çeşitlilik değerlerini daha fazla yayma eğilimindedir.
 
 Vegan, biyolojik çeşitlilik istatistiklerini hesaplamak için kullanılan bir araç setidir.
 
