@@ -55,7 +55,9 @@ print(obj)
 
 ```{r}
 print(obj$data$tax_data)
+
 ```
+
 
 ```{r}
 names(obj$data) <- "otu_counts"
@@ -73,9 +75,38 @@ print(obj)
 ```
 
 
+
+
+## Manipulating taxonomic data
+
+
 ```{r}
-names(obj$data) <- "otu_counts"
+print(sample_data)
+```
+
+
+```{r}
+sample_data <- sample_data[sample_data$Sample == "ecotypes", ]
+```
+
+
+```{r}
+library(dplyr)
+sample_data <- filter(sample_data, Sample == "ecotypes")
+```
+
+
+
+
+```{r}
+obj <- filter_taxa(obj, taxon_names != "")
 print(obj)
+```
+
+
+
+```{r}
+head(taxon_names(obj))
 ```
 
 
@@ -86,6 +117,13 @@ head(all_names(obj), 20)
 ```{r}
 length(all_names(obj))
 ```
+
+
+
+
+
+
+
 
 
 
