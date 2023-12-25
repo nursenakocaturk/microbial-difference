@@ -264,3 +264,16 @@ Vegan, biyolojik çeşitlilik istatistiklerini hesaplamak için kullanılan bir 
 ```{r}
 library("vegan")
 ```
+
+
+```{r}
+diversity(veri[-1], index="shannon")
+```
+
+
+```{r}
+diversity(veri[-1], index="simpson")
+```
+
+
+
