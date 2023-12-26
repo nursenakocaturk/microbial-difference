@@ -28,6 +28,7 @@ otu_data <- as_tibble(cbind(OTU_ID = seq(1,nrow(otu_data)), otu_data))
 ```
 
 
+
 ```{r}
 tax_data <- read_tsv("data/otu_metadata.txt")
 ```
@@ -122,8 +123,11 @@ length(all_names(obj))
 
 
 
-
-
-
+```{r}
+data.frame(OTUID = otu_data$OTU_ID,
+           Shannon =  diversity(x = otu_data[ ,-1],
+                                index = 'shannon'
+                                ))
+```
 
 
