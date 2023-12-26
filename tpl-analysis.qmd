@@ -267,13 +267,63 @@ library("vegan")
 
 
 ```{r}
-diversity(veri[-1], index="shannon")
+veri2 <- t(veri)
+```
+
+```{r}
+
+write.table(
+  x = data.frame(Sample_ID = seq(1,nrow(veri2)), 
+                 Species = rownames(veri2)), 
+  file = "data/otu_metadata.txt", quote = F, row.names = F, sep = "\t")
+
+rownames(veri2) <- seq(1,nrow(veri2))
+veri2 <- as_tibble(cbind(Sample_ID = seq(1,nrow(veri2)), veri2))
 ```
 
 
 ```{r}
-diversity(veri[-1], index="simpson")
+data.frame(Sample_ID = veri2$Sample_ID,
+           Shannon =  diversity(x = veri2[,-1],
+                                index = 'shannon'
+                                ))
 ```
+
+
+```{r}
+data.frame(Sample_ID = veri2$Sample_ID,
+           Simpson =  diversity(x = veri2[,-1],
+                                index = 'simpson'
+                                ))
+```
+
+
+```{r}
+data.frame(Sample_ID = veri2$Sample_ID,
+           invsimpson =  diversity(x = veri2[,-1],
+                                index = 'invsimpson'
+                                ))
+```
+```{r}
+diversity(veri2[-1], index="shannon")
+```
+
+
+
+
+```{r}
+diversity(veri2[-1], index="simpson")
+```
+
+
+
+```{r}
+diversity(veri2[-1], index="invsimpson")
+```
+
+
+
+
 
 
 
