@@ -19,6 +19,7 @@ Bu dökümanda tpl veri analizi adımları dökümante edilecektir.
 library(vegan)
 library(ggplot2)
 library(ecodist)
+library(tidyverse)
 ```
 
 ## Veri yükleme
@@ -49,10 +50,17 @@ Her dokuya ait kaç tane örnek var acaba?
 table(metadata$Tissue)
 ```
 
+Dentin ve cementum, tür sayılarını gösteren verileri yükleyelim:
+
+```{r}
+species <- read.table(file = "data/species.csv", header = T, sep = ";")
+```
+
+
 Dentin ve cementum farkını gösteren bir grafik oluşturalım.
 
 ```{r}
-ggplot(data = data, aes(x = Tissue, y = Number.of.species)) + geom_boxplot()
+ggplot(data = species, aes(x = Tissue, y = Number.of.species)) + geom_boxplot()
 ```
 
 ## Veri normalizasyonu
@@ -304,24 +312,15 @@ data.frame(Sample_ID = veri2$Sample_ID,
                                 index = 'invsimpson'
                                 ))
 ```
+
+
 ```{r}
 diversity(veri2[-1], index="shannon")
-```
 
+diversity(veri2[-1], index="simpson")
 
-
-
-```{r}
 diversity(veri2[-1], index="simpson")
 ```
-
-
-
-```{r}
-diversity(veri2[-1], index="invsimpson")
-```
-
-
 
 
 
