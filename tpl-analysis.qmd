@@ -20,6 +20,7 @@ library(vegan)
 library(ggplot2)
 library(ecodist)
 library(tidyverse)
+library(phyloseq)
 ```
 
 ## Veri yükleme
@@ -60,7 +61,7 @@ species <- read.table(file = "data/species.csv", header = T, sep = ";")
 Dentin ve cementum farkını gösteren bir grafik oluşturalım.
 
 ```{r}
-ggplot(data = species, aes(x = Tissue, y = Number.of.species)) + geom_boxplot()
+ggplot(data = species, aes(x = Tissue, y = Number.of.species)) + geom_boxplot() + geom_point()
 ```
 
 ## Veri normalizasyonu
@@ -273,10 +274,13 @@ Vegan, biyolojik çeşitlilik istatistiklerini hesaplamak için kullanılan bir 
 library("vegan")
 ```
 
+Verinin sütun ve satırlarının yerini değiştirmek için transpoze etmemiz gerekir:
 
 ```{r}
 veri2 <- t(veri)
 ```
+
+Örnekleri Sample_ID olarak isimlendirelim.
 
 ```{r}
 
@@ -290,8 +294,10 @@ veri2 <- as_tibble(cbind(Sample_ID = seq(1,nrow(veri2)), veri2))
 ```
 
 
+Verideki shannon, simpson ve invsimpson değerlerini 
+
 ```{r}
-data.frame(Sample_ID = veri2$Sample_ID,
+shannon <- data.frame(Sample_ID = veri2$Sample_ID,
            Shannon =  diversity(x = veri2[,-1],
                                 index = 'shannon'
                                 ))
@@ -299,7 +305,7 @@ data.frame(Sample_ID = veri2$Sample_ID,
 
 
 ```{r}
-data.frame(Sample_ID = veri2$Sample_ID,
+simpson <- data.frame(Sample_ID = veri2$Sample_ID,
            Simpson =  diversity(x = veri2[,-1],
                                 index = 'simpson'
                                 ))
@@ -307,19 +313,47 @@ data.frame(Sample_ID = veri2$Sample_ID,
 
 
 ```{r}
-data.frame(Sample_ID = veri2$Sample_ID,
+invsimpson <- data.frame(Sample_ID = veri2$Sample_ID,
            invsimpson =  diversity(x = veri2[,-1],
                                 index = 'invsimpson'
                                 ))
 ```
 
 
+Shannon, simspon ve invsimpson değerlerini gösteren verileri yükleyelim:
+
 ```{r}
-diversity(veri2[-1], index="shannon")
+shannon <- read.table(file = "results/shannon.csv", header = T, sep = ";")
+```
 
-diversity(veri2[-1], index="simpson")
+```{r}
+simpson <- read.table(file = "results/simpson.csv", header = T, sep = ";")
+```
 
-diversity(veri2[-1], index="simpson")
+```{r}
+invsimpson <- read.table(file = "results/invsimpson.csv", header = T, sep = ";")
+```
+
+
+Dokuların çeşitlilik farkını gösteren garfikleri oluşturalım:
+
+```{r}
+ggplot(data = shannon, aes(x = Tissue, y = Shannon)) + geom_boxplot() + geom_point()
+```
+
+
+```{r}
+ggplot(data = shannon, aes(x = Sample_ID, y = Shannon, color = Tissue)) + geom_point() 
+```
+
+
+```{r}
+ggplot(data = simpson, aes(x = Tissue, y = Simpson)) + geom_boxplot() + geom_point()
+```
+
+
+```{r}
+ggplot(data = invsimpson, aes(x = Tissue, y = Invsimpson)) + geom_boxplot() + geom_point()
 ```
 
 
