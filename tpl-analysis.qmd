@@ -363,30 +363,46 @@ Dentin ve cementum arasındaki alfa çeşitlilikliliklerde anlamlı bir fark var
 
 t-testi, iki grubun ortalamaları arasında anlamlı bir fark olup olmadığını test etmek için kullanılabilir.
 
+Bunu göstermek için iki farklı dağılım olmalıdır:
+
+Dentin ve cementum dokularındaki shannon değerlerini elde edelim:
+
 ```{r}
 Dentin_Shannon <- shannon$Shannon[shannon$Tissue == "Dentin"]
 
 Cementum_Shannon <- shannon$Shannon[shannon$Tissue == "Cementum"]
 ```
 
+Dentin ve cementum dokularındaki shannon değer ortalamaları çok fazla olmamakla birlikte, birbirinden farklı değerler taşımaktadır. Bu farkın anlamlı olup olmadığını tespit etmek için 't.test' kullanabiliriz:
+
 ```{r}
 test <- t.test(x = Dentin_Shannon, y = Cementum_Shannon)
-
 test
-
 ```
+
+Burada dikkat edilmesi gereken iki nokta var:
+
+-   mean of x, mean of y satırı
+
+-   p-value
+
+P-value önemli bir değerdir. T testi sonunda elde ettiğimiz p-value sonucu düşük bir değerdir. Bu sonuç aslında, bu iki dokunun ortalamalarının birbirinden farklı olduklarını göstermektedir.
+
+Dentin ve cementum dokularındaki simpson değerleri:
 
 ```{r}
 Dentin_Simpson <- simpson$Simpson[simpson$Tissue == "Dentin"]
 
 Cementum_Simpson <- simpson$Simpson[simpson$Tissue == "Cementum"]
+
 ```
 
 ```{r}
 test <- t.test(x = Dentin_Simpson, y = Cementum_Simpson)
-
 test
 ```
+
+Dentin ve cementum dokularındaki invsimpson değerleri:
 
 ```{r}
 Dentin_Invsimpson <- invsimpson$Invsimpson[invsimpson$Tissue == "Dentin"]
@@ -396,6 +412,5 @@ Cementum_Invsimpson <- invsimpson$Invsimpson[invsimpson$Tissue == "Cementum"]
 
 ```{r}
 test <- t.test(x = Dentin_Invsimpson, y = Cementum_Invsimpson)
-
 test
 ```
