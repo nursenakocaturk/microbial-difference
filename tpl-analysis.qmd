@@ -376,8 +376,8 @@ Cementum_Shannon <- shannon$Shannon[shannon$Tissue == "Cementum"]
 Dentin ve cementum dokularındaki shannon değer ortalamaları çok fazla olmamakla birlikte, birbirinden farklı değerler taşımaktadır. Bu farkın anlamlı olup olmadığını tespit etmek için 't.test' kullanabiliriz:
 
 ```{r}
-test <- t.test(x = Dentin_Shannon, y = Cementum_Shannon)
-test
+test.shannon <- t.test(x = Dentin_Shannon, y = Cementum_Shannon)
+test.shannon
 ```
 
 Burada dikkat edilmesi gereken iki nokta var:
@@ -398,8 +398,8 @@ Cementum_Simpson <- simpson$Simpson[simpson$Tissue == "Cementum"]
 ```
 
 ```{r}
-test <- t.test(x = Dentin_Simpson, y = Cementum_Simpson)
-test
+test.simpson <- t.test(x = Dentin_Simpson, y = Cementum_Simpson)
+test.simpson
 ```
 
 Dentin ve cementum dokularındaki invsimpson değerleri:
@@ -411,6 +411,6 @@ Cementum_Invsimpson <- invsimpson$Invsimpson[invsimpson$Tissue == "Cementum"]
 ```
 
 ```{r}
-test <- t.test(x = Dentin_Invsimpson, y = Cementum_Invsimpson)
-test
+test.invsimpson <- t.test(x = Dentin_Invsimpson, y = Cementum_Invsimpson)
+test.invsimpson
 ```
