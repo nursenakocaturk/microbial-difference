@@ -246,13 +246,13 @@ Alfa çeşitliliği, tek bir örnekteki tür çeşitliliğini ölçer. İncelene
 
 #### Shannon indeksi
 
-+ Rastgele seçilmiş bir bireyin kimlik tahmini
++ Bir topluluktaki türlerin çeşitliliğini ölçmek için kullanılır.
 
-+ Dizilerdeki entropiyi (değişkenin olası sonuçlarına özgü bilgi ve belirsizliğin ortalama düzeyidir) ölçmektedir. 
++ Shannon indeksi, belirli bir topluluktaki türlerin ne kadar öeşitli olduğunu gösterir. Türlerin sayısı ve bolukların eşitliği arttıkça artar.
 
-+ İncelenen dizide ne kadar fazla tür gözlemlenirse ve bolluklar ne kadar eşit olursa, diğer okumaya bakıldığında bir sonraki adımda hangi türün gözlemleneceğini tahmin etmek o kadar zordur.
++ Shannon değeri ne kadar yüksekse, topluluktaki tür çeşitliliği de o kadar yüksektir. Ne kadar düşük olursa da o kadar düşüktür. Bu değer '0' olduğunda, bir türün bulunduğu bir topluluğu belirtmektedir. 
 
-+ Shannon entropisi bu tahminle ilişkili belirsizliği ölçer.
++ Eğer bir alandaki türler eşit olarak dağılmışsa shannon indeksi daha yüksek olur. Ancak birkaç tür daha baskın ise indeks daha düşük olur. 
 
 #### Simpson indeksi
 
@@ -297,7 +297,7 @@ veri2 <- as_tibble(cbind(Sample_ID = seq(1,nrow(veri2)), veri2))
 Verideki shannon, simpson ve invsimpson değerlerini 
 
 ```{r}
-shannon <- data.frame(Sample_ID = veri2$Sample_ID,
+data.frame(Sample_ID = veri2$Sample_ID,
            Shannon =  diversity(x = veri2[,-1],
                                 index = 'shannon'
                                 ))
@@ -305,7 +305,7 @@ shannon <- data.frame(Sample_ID = veri2$Sample_ID,
 
 
 ```{r}
-simpson <- data.frame(Sample_ID = veri2$Sample_ID,
+data.frame(Sample_ID = veri2$Sample_ID,
            Simpson =  diversity(x = veri2[,-1],
                                 index = 'simpson'
                                 ))
@@ -313,7 +313,7 @@ simpson <- data.frame(Sample_ID = veri2$Sample_ID,
 
 
 ```{r}
-invsimpson <- data.frame(Sample_ID = veri2$Sample_ID,
+data.frame(Sample_ID = veri2$Sample_ID,
            invsimpson =  diversity(x = veri2[,-1],
                                 index = 'invsimpson'
                                 ))
@@ -355,6 +355,52 @@ ggplot(data = simpson, aes(x = Tissue, y = Simpson)) + geom_boxplot() + geom_poi
 ```{r}
 ggplot(data = invsimpson, aes(x = Tissue, y = Invsimpson)) + geom_boxplot() + geom_point()
 ```
+
+
+
+```{r}
+Dentin_Shannon <- shannon$Shannon[shannon$Tissue == "Dentin"]
+Cementum_Shannon <- shannon$Shannon[shannon$Tissue == "Cementum"]
+```
+
+
+```{r}
+test <- t.test(x = Dentin_Shannon, y = Cementum_Shannon)
+
+test
+```
+
+
+
+```{r}
+Dentin_Simpson <- simpson$Simpson[simpson$Tissue == "Dentin"]
+Cementum_Simpson <- simpson$Simpson[simpson$Tissue == "Cementum"]
+```
+
+
+```{r}
+test <- t.test(x = Dentin_Simpson, y = Cementum_Simpson)
+
+test
+```
+
+
+
+```{r}
+Dentin_Invsimpson <- invsimpson$Invsimpson[invsimpson$Tissue == "Dentin"]
+Cementum_Invsimpson <- invsimpson$Invsimpson[invsimpson$Tissue == "Cementum"]
+```
+
+
+```{r}
+test <- t.test(x = Dentin_Invsimpson, y = Cementum_Invsimpson)
+
+test
+```
+
+
+
+
 
 
 
