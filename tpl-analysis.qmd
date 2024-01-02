@@ -359,9 +359,17 @@ Grafiklere bakıldığında dokulardaki ortalamalar arasındaki farklar gözleml
 
 Dentin ve cementum arasındaki alfa çeşitlilikliliklerde anlamlı bir fark var mı?
 
-### t.test()
+### T-test()
 
 t-testi, iki grubun ortalamaları arasında anlamlı bir fark olup olmadığını test etmek için kullanılabilir.
+
+#### Test Shannon
+
+Dentin ve cementum dokulaının, shannon değerleri anlamlı olarak birbirinden farklı mı?
+
+```{r}
+ggplot(data = shannon, aes(x = Shannon)) + geom_density(aes(fill = Tissue), alpha = 0.7)
+```
 
 Bunu göstermek için iki farklı dağılım olmalıdır:
 
@@ -380,13 +388,59 @@ test.shannon <- t.test(x = Dentin_Shannon, y = Cementum_Shannon)
 test.shannon
 ```
 
-Burada dikkat edilmesi gereken iki nokta var:
+T testi sonunda elde ettiğimiz p-değerini şu şekilde geri döndürebiliriz:
 
--   mean of x, mean of y satırı
+```{r}
+test.shannon$p.value
+```
 
--   p-value
+P-value önemli bir değerdir. T testi sonunda elde ettiğimiz p-value sonucu düşük bir değerdir. Bu sonuç, bu iki dokunun ortalamalarının birbirinden farklı olduklarını göstermektedir.
 
-P-value önemli bir değerdir. T testi sonunda elde ettiğimiz p-value sonucu düşük bir değerdir. Bu sonuç aslında, bu iki dokunun ortalamalarının birbirinden farklı olduklarını göstermektedir.
+##### Hipotez testi
+
+T-test için iki hipotez vardır:
+
+-   H0 (sıfır hipotezi): Bu iki dağılımın ortamaları birbirine eşittir.
+
+-   HA (alternatif hipotez): Bu iki dağılımın ortalamarı birbirinden farklıdır.
+
+Test sonucunda elde edilen p-değeri, sıfır hipotezinin oluşma olasılığını ifade etmektedir.
+
+P-değeri 0.3'tür ve düşük bir değerdir. Yani bu iki dağılımın ortalamalarının aynı olması düşük bir olasılık olabilir. Bu olasılığın anlamlı olup olmadığını öğrenmek için ise belirli alpha değerleri kullanılır:
+
+-   0.001 (binde 1 hata olasılığı)
+
+-   0.01 (%1 hata olasılığı)
+
+-   0.05 (%5 hata olasığı)
+
+0.0001 alpha değeri altında elde edilen sonuç anlamlı mı?
+
+```{r}
+test.shannon$p.value < 0.0001
+```
+
+???
+
+Bu iki popülasyonun ortamalarının aynı olma ihtimalinin yüksek olduğunu görüyoruz. Bu nedenle sıfır hipotezini reddedmiyoruz.
+
+```{r}
+test.shannon
+```
+
+???
+
+-   alternative hypothesis: true difference in means is not equal to 0
+
+Bunun anlamı: 0.0001 hata olasılığı durumunda, bu iki dağılımın ortalamaları anlamlı bir şekilde farklı. Yani sıfır hipotezini reddedip, alternatif hipotezi kabul ediyoruz.
+
+#### Test Simpson
+
+Dentin ve cementum dokulaının, simpson değerleri anlamlı olarak birbirinden farklı mı?
+
+```{r}
+ggplot(data = simpson, aes(x = Simpson)) + geom_density(aes(fill = Tissue), alpha = 0.7)
+```
 
 Dentin ve cementum dokularındaki simpson değerleri:
 
@@ -400,6 +454,14 @@ Cementum_Simpson <- simpson$Simpson[simpson$Tissue == "Cementum"]
 ```{r}
 test.simpson <- t.test(x = Dentin_Simpson, y = Cementum_Simpson)
 test.simpson
+```
+
+#### Test Invsimpson
+
+Dentin ve cementum dokulaının, invsimpson değerleri anlamlı olarak birbirinden farklı mı?
+
+```{r}
+ggplot(data = invsimpson, aes(x = Invsimpson)) + geom_density(aes(fill = Tissue), alpha = 0.7)
 ```
 
 Dentin ve cementum dokularındaki invsimpson değerleri:
