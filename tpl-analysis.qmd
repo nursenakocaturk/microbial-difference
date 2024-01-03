@@ -42,11 +42,6 @@ otu_data <- read.table(file = "data/krakenuniq_abundance_matrix.txt", header = T
 dim(otu_data)
 ```
 
-Örneklerin sıralamasını Sample_ID olarak gösterelim:
-
-```{r include = FALSE, eval = FALSE}
-tax_data <- read_tsv("data/otu_metadata.txt")
-```
 
 Şimdi de, örneklerin sahip oldukları doku bilgilerini yükleyelim:
 
@@ -63,7 +58,7 @@ Her dokuya ait kaç tane örnek var acaba?
 table(sample_data$Tissue)
 ```
 
-Düşük çokluğa sahip olan örnekleri belirleyelim
+Düşük çokluğa sahip olan örnekleri belirleyelim.
 
 ```{r}
 keep <- rowMeans(otu_data) >= 10
@@ -73,6 +68,7 @@ deleted <- rowMeans(otu_data) < 10
 otu_data <- otu_data[keep,]
 ```
 
+Elimizde `r length(deleted)` tane, düşük çokluğa sahip takson bulunmaktadır.
 
 Dentin ve cementum, tür sayılarını gösteren verileri yükleyelim:
 
@@ -108,19 +104,19 @@ Elimizdeki mikrobiyal çokluk matrisini öncelikle normalize etmemiz gereklidir.
 
 İlk olarak, bütun sutunların (yani her örneğin) toplam değerlerini elde edelim. Bu bize her örnekten elde edilen fastq dosyaının okuma derinliğini verecektir
 
-```{r}
+```{r eval = F, include = F}
 read_depth <- colSums(otu_data)
 ```
 
 Şimdi de fastq dosyalarının sahip oldukları okuma derinliklerini görselleştirelim:
 
-```{r fig.cap = "Read depth values of the tested fastq files (million reads)"}
+```{r fig.cap = "Read depth values of the tested fastq files (million reads)", eval = F, include = F}
 barplot(read_depth/10^6, axisnames = FALSE, ylab = "Read Depth (million reads)", xlab="Fastq Files")
 ```
 
 Derinlikler aynı değil. O yüzden, çokluk tablosunu, toplam okuma derinliğine göre normalize edersek, daha iyi bir karşılaştırma yapabiliriz.
 
-```{r}
+```{r eval = F, include = F}
 otu_data <- scale(otu_data,center = F, scale = colSums(otu_data))
 ```
 
@@ -312,7 +308,6 @@ Vegan, biyolojik çeşitlilik istatistiklerini hesaplamak için kullanılan bir 
 library("vegan")
 ```
 
-
 `otu_data` verisindeki alfa çeşitliliğini hesaplayalım. Bu çeşitliliğin indeksleri olan shannon, simpson ve invsimpson değerlerini bulalım:
 
 
@@ -330,7 +325,7 @@ alpha <- data.frame(Sample = colnames(otu_data),
                     Tissue = sample_data$Tissue)
 ```
 
-Dentin, cementum, kafatası ve uzun kemik dokuların, shannon değerlerini gösteren grafii oluşturalım:
+Dentin, cementum, kafatası ve uzun kemik dokuların, shannon değerlerini gösteren grafiği oluşturalım:
 
 ```{r}
 ggplot(data = alpha, aes(x = Tissue, y = Shannon)) + geom_boxplot() + geom_point()
@@ -352,11 +347,11 @@ Grafiklere bakıldığında dokulardaki ortalamalar arasındaki farklar gözleml
 
 Dentin ve cementum arasındaki alfa çeşitlilikliliklerde anlamlı bir fark var mı?
 
-### T-test()
+### Dentin ve Cementum alfa çeşitlikler arasında anlamı fark var mı?
 
 t-testi, iki grubun ortalamaları arasında anlamlı bir fark olup olmadığını test etmek için kullanılabilir.
 
-#### Test Shannon
+#### Shannon çeşitlilği için
 
 Dentin ve cementum dokulaının, shannon değerleri anlamlı olarak birbirinden farklı mı?
 
@@ -368,16 +363,11 @@ Bunu göstermek için iki farklı dağılım olmalıdır:
 
 Dentin ve cementum dokularındaki shannon değerlerini elde edelim:
 
-```{r}
-Dentin_Shannon <- alpha$Shannon[alpha$Tissue == "Dentin"]
-
-Cementum_Shannon <- alpha$Shannon[alpha$Tissue == "Cementum"]
-```
-
 Dentin ve cementum dokularındaki shannon değer ortalamaları çok fazla olmamakla birlikte, birbirinden farklı değerler taşımaktadır. Bu farkın anlamlı olup olmadığını tespit etmek için 't.test' kullanabiliriz:
 
 ```{r}
-test.shannon <- t.test(x = Dentin_Shannon, y = Cementum_Shannon)
+test.shannon <- t.test(x = alpha$Shannon[alpha$Tissue == "Dentin"], 
+                                         y = alpha$Shannon[alpha$Tissue == "Cementum"])
 test.shannon
 ```
 
@@ -389,43 +379,13 @@ test.shannon$p.value
 
 P-value önemli bir değerdir. T testi sonunda elde ettiğimiz p-value sonucu düşük bir değerdir. Bu sonuç, bu iki dokunun ortalamalarının birbirinden farklı olduklarını göstermektedir.
 
-##### Hipotez testi
-
-T-test için iki hipotez vardır:
-
--   H0 (sıfır hipotezi): Bu iki dağılımın ortamaları birbirine eşittir.
-
--   HA (alternatif hipotez): Bu iki dağılımın ortalamarı birbirinden farklıdır.
-
-Test sonucunda elde edilen p-değeri, sıfır hipotezinin oluşma olasılığını ifade etmektedir.
-
-P-değeri 0.3'tür ve düşük bir değerdir. Yani bu iki dağılımın ortalamalarının aynı olması düşük bir olasılık olabilir. Bu olasılığın anlamlı olup olmadığını öğrenmek için ise belirli alpha değerleri kullanılır:
-
--   0.001 (binde 1 hata olasılığı)
-
--   0.01 (%1 hata olasılığı)
-
--   0.05 (%5 hata olasığı)
-
-0.0001 alpha değeri altında elde edilen sonuç anlamlı mı?
+0.001 alpha değeri altında elde edilen sonuç anlamlı mı?
 
 ```{r}
-test.shannon$p.value < 0.0001
+test.shannon$p.value < 0.001
 ```
-
-???
 
 Bu iki popülasyonun ortamalarının aynı olma ihtimalinin yüksek olduğunu görüyoruz. Bu nedenle sıfır hipotezini reddedmiyoruz.
-
-```{r}
-test.shannon
-```
-
-???
-
--   alternative hypothesis: true difference in means is not equal to 0
-
-Bunun anlamı: 0.0001 hata olasılığı durumunda, bu iki dağılımın ortalamaları anlamlı bir şekilde farklı. Yani sıfır hipotezini reddedip, alternatif hipotezi kabul ediyoruz.
 
 #### Test Simpson
 
@@ -438,14 +398,8 @@ ggplot(data = alpha, aes(x = Simpson)) + geom_density(aes(fill = Tissue), alpha 
 Dentin ve cementum dokularındaki simpson değerleri:
 
 ```{r}
-Dentin_Simpson <- alpha$Simpson[alpha$Tissue == "Dentin"]
-
-Cementum_Simpson <- alpha$Simpson[alpha$Tissue == "Cementum"]
-
-```
-
-```{r}
-test.simpson <- t.test(x = Dentin_Simpson, y = Cementum_Simpson)
+test.simpson <- t.test(x = alpha$Simpson[alpha$Tissue == "Dentin"], 
+                       y = alpha$Simpson[alpha$Tissue == "Cementum"])
 test.simpson
 ```
 
@@ -460,12 +414,35 @@ ggplot(data = alpha, aes(x = Invsimpson)) + geom_density(aes(fill = Tissue), alp
 Dentin ve cementum dokularındaki invsimpson değerleri:
 
 ```{r}
-Dentin_Invsimpson <- alpha$Invsimpson[alpha$Tissue == "Dentin"]
-
-Cementum_Invsimpson <- alpha$Invsimpson[alpha$Tissue == "Cementum"]
-```
-
-```{r}
-test.invsimpson <- t.test(x = Dentin_Invsimpson, y = Cementum_Invsimpson)
+test.invsimpson <- t.test(x = alpha$Invsimpson[alpha$Tissue == "Dentin"], 
+                          y = alpha$Invsimpson[alpha$Tissue == "Cementum"])
 test.invsimpson
 ```
+
+## Dentin ve Cementum arasında anlamlıd değişen mikroplar
+
+Sadece Dentin ve Cementum örneklerini alıp yeni bir Deseq verisi oluşturalım
+
+```{r}
+
+sample_data_subset <- sample_data[sample_data$Tissue %in% c("Dentin", "Cementum"),]
+otu_data_subset <- otu_data[,rownames(sample_data[sample_data$Tissue %in% c("Dentin", "Cementum"),])]
+
+dds <- DESeqDataSetFromMatrix(countData = otu_data_subset, colData = sample_data_subset, design = ~Tissue)
+dds <- DESeq(dds)
+```
+
+Hangi mikroplar anlamlı değişmi?
+
+```{r}
+dds_results <- results(dds)
+dds_results <- dds_results[!is.na(dds_results$padj),]
+
+```
+
+Normalize edilmiş p değeri 0.001'den küçük olanlar
+
+```{r}
+significant <- dds_results[dds_results$padj < 0.001, ]
+```
+
