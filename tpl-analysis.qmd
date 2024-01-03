@@ -52,6 +52,7 @@ tax_data <- read_tsv("data/otu_metadata.txt")
 
 ```{r}
 sample_data <- read.table(file = "data/metadata.csv", header = T, sep = ";")
+rownames(sample_data) <- sample_data$Sample
 ```
 
 Uyarı: Bu noktada veri sütunlar ile metadata içerisindeki örnek bilgisinin aynı sırada olması önemlidir.
@@ -61,6 +62,17 @@ Her dokuya ait kaç tane örnek var acaba?
 ```{r}
 table(sample_data$Tissue)
 ```
+
+Düşük çokluğa sahip olan örnekleri belirleyelim
+
+```{r}
+keep <- rowMeans(otu_data) >= 10
+deleted <- rowMeans(otu_data) < 10
+
+
+otu_data <- otu_data[keep,]
+```
+
 
 Dentin ve cementum, tür sayılarını gösteren verileri yükleyelim:
 
@@ -74,7 +86,7 @@ for (i in 1: ncol(otu_data)){
   species[i,3] <- sample_data$Tissue[sample_data$Sample==colnames(otu_data)[i]]
   }
 
-species <- read.table(file = "data/species.csv", header = T, sep = ";")
+#species <- read.table(file = "data/species.csv", header = T, sep = ";")
 ```
 
 Dentin ve cementum farkını gösteren bir grafik oluşturalım.
@@ -84,6 +96,13 @@ ggplot(data = species, aes(x = Tissue, y = `Number of Species`)) + geom_boxplot(
 ```
 
 ## Veri normalizasyonu
+
+```{r}
+dds <- DESeqDataSetFromMatrix(countData = otu_data, colData = sample_data, design = ~Tissue)
+dds <- DESeq(dds)
+otu_data_normalized <- counts(dds, normalized = TRUE)
+```
+
 
 Elimizdeki mikrobiyal çokluk matrisini öncelikle normalize etmemiz gereklidir. Çünkü her DNA kütüphanesi farklı okuma derinliğine (toplam okuma sayısı) sahiptir.
 
@@ -114,7 +133,7 @@ Verilen matris üzerinde PCA gerçekleştirir ve sonuçlar `prcomp` sınıfını
 Burada önemli olan nokta, veriyi transpoze etmemiz. Yani satırları sütün, sütunları ise satır yapıyoruz.
 
 ```{r}
-pca_res <- prcomp(t(otu_data))
+pca_res <- prcomp(t(otu_data_normalized))
 ```
 
 Prcomp sonuç nesnesinin özeti:
@@ -215,7 +234,7 @@ Bu adımda, örneklerin sahip oldukları mikrobiyal uzaklıkları hesaplayarak, 
 Önce Bray-Curtis ekolojik uzaklığını elde edelim:
 
 ```{r}
-bray_curtis_dist <- vegdist(t(otu_data), method = "bray")
+bray_curtis_dist <- vegdist(t(otu_data_normalized), method = "bray")
 ```
 
 Sonra, `pco` ile bu uzaklık matrisinin öz bileşenlerine ayıralım:
@@ -230,7 +249,7 @@ Aynı şekilde, bizim için önemli olan eksenleri ve doku bilgisini alalım.
 bray_curtis_pcoa_df <- data.frame(PCOA1 = bray_curtis_pcoa$vectors[,1], 
                                   PCOA2 = bray_curtis_pcoa$vectors[,2],
                                   PCOA3 = bray_curtis_pcoa$vectors[,3],
-                                  Tissue = metadata$Tissue)
+                                  Tissue = sample_data$Tissue)
 ```
 
 Önce PC1 ve PC2 eksenlerini inceleyelim:
@@ -293,80 +312,40 @@ Vegan, biyolojik çeşitlilik istatistiklerini hesaplamak için kullanılan bir 
 library("vegan")
 ```
 
-Elimizdeki verinin sütunları bakterilerden, satırları ise örneklerden oluşmaktadır. Analizleri daha basit olması için sütun ve satırların yerlerinin değiştirerek, sütunların örnekler olmasını sağlamalıyız. Oluşacak olan yeni veriye de 'otu_data2' ismiyle adlandıralım:
+
+`otu_data` verisindeki alfa çeşitliliğini hesaplayalım. Bu çeşitliliğin indeksleri olan shannon, simpson ve invsimpson değerlerini bulalım:
+
 
 ```{r}
-otu_data2 <- t(otu_data)
-```
+shannon <- diversity(x = t(otu_data_normalized), index = 'shannon')
 
-Analizlerin daha anlaşılır olması açısından örnekleri 'Sample_ID' olarak isimlendirelim.
+simpson <- diversity(x = t(otu_data_normalized),index = 'simpson')
 
-```{r}
+invsimpson <- diversity(x = t(otu_data_normalized),index = 'invsimpson')
 
-write.table(
-  x = data.frame(Sample_ID = seq(1,nrow(otu_data2)), 
-                 Species = rownames(otu_data2)), 
-  file = "data/otu_metadata.txt", quote = F, row.names = F, sep = "\t")
-
-rownames(otu_data2) <- seq(1,nrow(otu_data2))
-
-
-otu_data2 <- as_tibble(cbind(Sample_ID = seq(1,nrow(otu_data2)), otu_data2))
-```
-
-'otu_data2' verisindeki alfa çeşitliliğini hesaplayalım. Bu çeşitliliğin indeksleri olan shannon, simpson ve invsimpson değerlerini bulalım:
-
-```{r}
-data.frame(Sample_ID = veri2$Sample_ID,
-           Shannon =  diversity(x = otu_data2[,-1],
-                                index = 'shannon'
-                                ))
-```
-
-```{r}
-data.frame(Sample_ID = veri2$Sample_ID,
-           Simpson =  diversity(x = otu_data2[,-1],
-                                index = 'simpson'
-                                ))
-```
-
-```{r}
-data.frame(Sample_ID = veri2$Sample_ID,
-           invsimpson =  diversity(x = otu_data2[,-1],
-                                index = 'invsimpson'
-                                ))
-```
-
-Shannon, simspon ve invsimpson değerlerini ve dokuları gösteren verileri yükleyelim:
-
-```{r}
-shannon <- read.table(file = "results/shannon.csv", header = T, sep = ";")
-```
-
-```{r}
-simpson <- read.table(file = "results/simpson.csv", header = T, sep = ";")
-```
-
-```{r}
-invsimpson <- read.table(file = "results/invsimpson.csv", header = T, sep = ";")
+alpha <- data.frame(Sample = colnames(otu_data), 
+                    Shannon = shannon,
+                    Simpson = simpson,
+                    Invsimpson = invsimpson,
+                    Tissue = sample_data$Tissue)
 ```
 
 Dentin, cementum, kafatası ve uzun kemik dokuların, shannon değerlerini gösteren grafii oluşturalım:
 
 ```{r}
-ggplot(data = shannon, aes(x = Tissue, y = Shannon)) + geom_boxplot() + geom_point()
+ggplot(data = alpha, aes(x = Tissue, y = Shannon)) + geom_boxplot() + geom_point()
 ```
 
 Simpson değerlerini gösteren grafiği oluşturalım:
 
 ```{r}
-ggplot(data = simpson, aes(x = Tissue, y = Simpson)) + geom_boxplot() + geom_point()
+ggplot(data = alpha, aes(x = Tissue, y = Simpson)) + geom_boxplot() + geom_point()
 ```
 
 Invsimpson değerlerini gösteren garfiği oluşturalım:
 
 ```{r}
-ggplot(data = invsimpson, aes(x = Tissue, y = Invsimpson)) + geom_boxplot() + geom_point()
+ggplot(data = alpha, aes(x = Tissue, y = Invsimpson)) + geom_boxplot() + geom_point()
 ```
 
 Grafiklere bakıldığında dokulardaki ortalamalar arasındaki farklar gözlemlenmektedir.
@@ -382,7 +361,7 @@ t-testi, iki grubun ortalamaları arasında anlamlı bir fark olup olmadığın�
 Dentin ve cementum dokulaının, shannon değerleri anlamlı olarak birbirinden farklı mı?
 
 ```{r}
-ggplot(data = shannon, aes(x = Shannon)) + geom_density(aes(fill = Tissue), alpha = 0.7)
+ggplot(data = alpha, aes(x = Shannon)) + geom_density(aes(fill = Tissue), alpha = 0.5)
 ```
 
 Bunu göstermek için iki farklı dağılım olmalıdır:
@@ -390,9 +369,9 @@ Bunu göstermek için iki farklı dağılım olmalıdır:
 Dentin ve cementum dokularındaki shannon değerlerini elde edelim:
 
 ```{r}
-Dentin_Shannon <- shannon$Shannon[shannon$Tissue == "Dentin"]
+Dentin_Shannon <- alpha$Shannon[alpha$Tissue == "Dentin"]
 
-Cementum_Shannon <- shannon$Shannon[shannon$Tissue == "Cementum"]
+Cementum_Shannon <- alpha$Shannon[alpha$Tissue == "Cementum"]
 ```
 
 Dentin ve cementum dokularındaki shannon değer ortalamaları çok fazla olmamakla birlikte, birbirinden farklı değerler taşımaktadır. Bu farkın anlamlı olup olmadığını tespit etmek için 't.test' kullanabiliriz:
@@ -453,15 +432,15 @@ Bunun anlamı: 0.0001 hata olasılığı durumunda, bu iki dağılımın ortalam
 Dentin ve cementum dokulaının, simpson değerleri anlamlı olarak birbirinden farklı mı?
 
 ```{r}
-ggplot(data = simpson, aes(x = Simpson)) + geom_density(aes(fill = Tissue), alpha = 0.7)
+ggplot(data = alpha, aes(x = Simpson)) + geom_density(aes(fill = Tissue), alpha = 0.7)
 ```
 
 Dentin ve cementum dokularındaki simpson değerleri:
 
 ```{r}
-Dentin_Simpson <- simpson$Simpson[simpson$Tissue == "Dentin"]
+Dentin_Simpson <- alpha$Simpson[alpha$Tissue == "Dentin"]
 
-Cementum_Simpson <- simpson$Simpson[simpson$Tissue == "Cementum"]
+Cementum_Simpson <- alpha$Simpson[alpha$Tissue == "Cementum"]
 
 ```
 
@@ -475,15 +454,15 @@ test.simpson
 Dentin ve cementum dokulaının, invsimpson değerleri anlamlı olarak birbirinden farklı mı?
 
 ```{r}
-ggplot(data = invsimpson, aes(x = Invsimpson)) + geom_density(aes(fill = Tissue), alpha = 0.7)
+ggplot(data = alpha, aes(x = Invsimpson)) + geom_density(aes(fill = Tissue), alpha = 0.7)
 ```
 
 Dentin ve cementum dokularındaki invsimpson değerleri:
 
 ```{r}
-Dentin_Invsimpson <- invsimpson$Invsimpson[invsimpson$Tissue == "Dentin"]
+Dentin_Invsimpson <- alpha$Invsimpson[alpha$Tissue == "Dentin"]
 
-Cementum_Invsimpson <- invsimpson$Invsimpson[invsimpson$Tissue == "Cementum"]
+Cementum_Invsimpson <- alpha$Invsimpson[alpha$Tissue == "Cementum"]
 ```
 
 ```{r}
