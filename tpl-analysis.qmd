@@ -5,6 +5,10 @@ format: html
 editor: visual
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
 # Giriş
 
 Bu dökümanda tpl veri analizi adımları dökümante edilecektir.
@@ -21,6 +25,7 @@ library(ggplot2)
 library(ecodist)
 library(tidyverse)
 library(phyloseq)
+library(DESeq2)
 ```
 
 ## Veri yükleme
@@ -39,7 +44,7 @@ dim(otu_data)
 
 Örneklerin sıralamasını Sample_ID olarak gösterelim:
 
-```{r}
+```{r include = FALSE, eval = FALSE}
 tax_data <- read_tsv("data/otu_metadata.txt")
 ```
 
@@ -60,13 +65,22 @@ table(sample_data$Tissue)
 Dentin ve cementum, tür sayılarını gösteren verileri yükleyelim:
 
 ```{r}
+species <- data.frame(matrix(data = NA, nrow = ncol(otu_data), ncol = 3))
+colnames(species) <- c("Sample", "Number of Species", "Tissue")
+
+for (i in 1: ncol(otu_data)){
+  species[i,1] <- colnames(otu_data)[i]
+  species[i,2] <- sum(otu_data[,i] > 0)
+  species[i,3] <- sample_data$Tissue[sample_data$Sample==colnames(otu_data)[i]]
+  }
+
 species <- read.table(file = "data/species.csv", header = T, sep = ";")
 ```
 
 Dentin ve cementum farkını gösteren bir grafik oluşturalım.
 
 ```{r}
-ggplot(data = species, aes(x = Tissue, y = Number.of.species)) + geom_boxplot() + geom_point()
+ggplot(data = species, aes(x = Tissue, y = `Number of Species`)) + geom_boxplot() + geom_point()
 ```
 
 ## Veri normalizasyonu
