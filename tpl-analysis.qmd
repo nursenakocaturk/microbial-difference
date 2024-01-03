@@ -446,3 +446,15 @@ Normalize edilmiş p değeri 0.001'den küçük olanlar
 significant <- dds_results[dds_results$padj < 0.001, ]
 ```
 
+Elimizdeki sonucu bir veri çerçevesine aktaralım:
+
+```{r}
+result <- data.frame(Sample = rownames(significant),
+  BaseMean=significant$baseMean, 
+  FoldChange=significant$log2FoldChange, 
+  Padj=significant$padj)
+
+```
+
+
+
