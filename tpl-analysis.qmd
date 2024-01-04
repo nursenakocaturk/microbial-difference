@@ -92,13 +92,17 @@ ggplot(data = species, aes(x = Tissue, y = `Number of Species`)) + geom_boxplot(
 
 ## Veri normalizasyonu
 
+Normalizasyon, verilerin işlenmesi ve analizi adımlarında kullanılan bir tekniktir. Verilerin ortak bir aralığa dönüştürülmesi için kullanılır ve böylelikle veri setinin dağılımını daha kararlaştırılabilir hale getirerek farklı dağılım gösteren değerleri yok eder. Normalleştirme, verilerin stabil hale gelmesini sağlayarak, veri üzerine yapılan çalışmalarda karşılaştırmaları kolaylaştırabilir.
+
+DeSeq2, ikiden fazla deney koşulları arasındaki diferansiyel bir şekilde analiz edilen bakterileri tanımlamak için kullanılır. Koşullar arasında hangi genlerin daha önemli ölçüde ifade edildiğini tanımlamak için istatiksel bir test mevcuttur. Diferansiyel analizlerin doğruluğunu arttırabilmek adına, normalleştirme yapma özelliğine sahiptir. Bu işlemi de sıralama derinliği üzerindeki farklılıkları ayarlayarak gerçekleştirir. Yanlış sonuçları kontrol edebilmek adına çoklu hipotez testi kullanır. Aynı zamanda önemli diferansiyel ifadeye sahip olan bakterileri de tespit eder.
+
+Elimizdeki mikrobiyal çokluk matrisini öncelikle normalize etmemiz gereklidir. Burada Deseq paketinin sahip olduğu normalizsayon yeteneklerini kullanıyoruz.
+
 ```{r}
 dds <- DESeqDataSetFromMatrix(countData = otu_data, colData = sample_data, design = ~Tissue)
 dds <- DESeq(dds)
 otu_data_normalized <- counts(dds, normalized = TRUE)
 ```
-
-Elimizdeki mikrobiyal çokluk matrisini öncelikle normalize etmemiz gereklidir. Burada Deseq paketinin shaip olduğu normalizsayon yeteneklerini kullanıyoruz.
 
 ```{r eval = F, include = F}
 otu_data <- scale(otu_data,center = F, scale = colSums(otu_data))
