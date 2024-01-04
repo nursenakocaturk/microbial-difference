@@ -33,6 +33,7 @@ library(DESeq2)
 Çalışmalarda kullanılacak mutlak çokluk verisi aşağıdaki gibi yüklenmektedir:
 
 ```{r}
+
 otu_data <- read.table(file = "data/krakenuniq_abundance_matrix.txt", header = T, sep = "\t")
 ```
 
@@ -62,7 +63,6 @@ Düşük çokluğa sahip olan örnekleri belirleyelim.
 ```{r}
 keep <- rowMeans(otu_data) >= 10
 deleted <- rowMeans(otu_data) < 10
-
 
 otu_data <- otu_data[keep,]
 ```
@@ -107,7 +107,6 @@ otu_data <- scale(otu_data,center = F, scale = colSums(otu_data))
 ## Veri kalitesi kontrolü
 
 ### Kümeleme
-
 
 ```{r}
 g <- otu_data_normalized
@@ -274,9 +273,6 @@ colnames(g) <- sample_data$Tissue
 bray_curtis_dist <- vegdist(t(g), method = "bray")
 plot(hclust(bray_curtis_dist))
 ```
-
-
-
 
 ## Alfa Çeşitliliği
 
@@ -491,7 +487,7 @@ logsig <- log2(sig)
 logsig[logsig == -Inf]<-0
 ```
 
-Son olarak ısı haritasını elde edelim ve bu genleri kaydedelim.
+Son olarak ısı haritasını elde edelim ve bu bakterileri kaydedelim.
 
 ```{r}
 library(pheatmap)
@@ -501,12 +497,14 @@ pheatmap(mat = logsig, cluster_cols = F)
 write.table(file = "significant_bacteria.csv", sep = ";", quote = FALSE, x = m, dec = ",")
 ```
 
+Dentin ve cementum dokularının ayrı olarak gözlemlediğimiz ısı haritasını elde edelim:
+
 ```{r}
 
 f <- sample_data_subset[order(sample_data_subset$Tissue),]
+colnames(logsig) <- sample_data_subset$Sample
 l<-logsig[,f$Sample]
 colnames(l)<-f$Tissue
 pheatmap(l, cluster_cols = F)
 
 ```
-
