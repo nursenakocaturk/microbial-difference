@@ -430,14 +430,14 @@ dds <- DESeqDataSetFromMatrix(countData = otu_data_subset, colData = sample_data
 dds <- DESeq(dds)
 ```
 
-Hangi mikroplar anlamlı değişmi?
+Hangi mikroplar anlamlı değişmiş?
 
 ```{r}
 dds_results <- results(dds)
 dds_results <- dds_results[!is.na(dds_results$padj),]
 ```
 
-Normalize edilmiş p değeri 0.001'den küçük olanlar
+Normalize edilmiş p değeri 0.01'den küçük olanlar
 
 ```{r}
 alpha <- 0.01
@@ -455,6 +455,8 @@ result <- data.frame(Sample = rownames(significant),
 ```
 
 Volcano plot ile anlamlı değişen bakterileri inceleyelim:
+
+Volcano plot, bakterilerin diferansiyel ifadesini temsil eden bir tür dağılım grafiğidir.
 
 ```{r}
 maxFold<-max(dds_results$log2FoldChange[!is.na(dds_results$log2FoldChange)])
