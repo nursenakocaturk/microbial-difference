@@ -36,7 +36,7 @@ library(DESeq2)
 otu_data <- read.table(file = "data/krakenuniq_abundance_matrix.txt", header = T, sep = "\t")
 ```
 
-Çalışma kapsamında toplam olarak `r ncol(veri)`kadar örnek ve`r nrow(veri)` kadar mikroorganizma bulunmaktadır:
+Çalışma kapsamında toplam olarak `r ncol(otu_data)`kadar örnek ve`r nrow(otu_data)` kadar mikroorganizma bulunmaktadır:
 
 ```{r}
 dim(otu_data)
@@ -67,7 +67,7 @@ deleted <- rowMeans(otu_data) < 10
 otu_data <- otu_data[keep,]
 ```
 
-Elimizde `r length(deleted)` tane, düşük çokluğa sahip takson bulunmaktadır.
+Elimizde `r sum(deleted)` tane, düşük çokluğa sahip takson bulunmaktadır.
 
 Dentin ve cementum, tür sayılarını gösteren verileri yükleyelim:
 
@@ -98,27 +98,16 @@ dds <- DESeq(dds)
 otu_data_normalized <- counts(dds, normalized = TRUE)
 ```
 
-Elimizdeki mikrobiyal çokluk matrisini öncelikle normalize etmemiz gereklidir. Çünkü her DNA kütüphanesi farklı okuma derinliğine (toplam okuma sayısı) sahiptir.
-
-İlk olarak, bütun sutunların (yani her örneğin) toplam değerlerini elde edelim. Bu bize her örnekten elde edilen fastq dosyaının okuma derinliğini verecektir
-
-```{r eval = F, include = F}
-read_depth <- colSums(otu_data)
-```
-
-Şimdi de fastq dosyalarının sahip oldukları okuma derinliklerini görselleştirelim:
-
-```{r fig.cap = "Read depth values of the tested fastq files (million reads)", eval = F, include = F}
-barplot(read_depth/10^6, axisnames = FALSE, ylab = "Read Depth (million reads)", xlab="Fastq Files")
-```
-
-Derinlikler aynı değil. O yüzden, çokluk tablosunu, toplam okuma derinliğine göre normalize edersek, daha iyi bir karşılaştırma yapabiliriz.
+Elimizdeki mikrobiyal çokluk matrisini öncelikle normalize etmemiz gereklidir. Burada Deseq paketinin shaip olduğu normalizsayon yeteneklerini kullanıyoruz.
 
 ```{r eval = F, include = F}
 otu_data <- scale(otu_data,center = F, scale = colSums(otu_data))
 ```
 
-## Clustering
+## Veri kalitesi kontrolü
+
+### Kümeleme
+
 
 ```{r}
 g <- otu_data_normalized
@@ -127,7 +116,7 @@ plot(hclust(dist(x = t(g), method = "euclidean")))
 
 ```
 
-## Birincil öz bileşen tahlili (PCA)
+### Birincil öz bileşen tahlili (PCA)
 
 PCA, büyük boyutlu olan verileri küçük boyuta indirgemek için kullanılan yaklaşımlardan biridir. Bütün eksenler aynı anda görselleştirilemez. PCA, çok boyutlu veriyi alarak üç boyuta indirgemektedir. İlk üç eksen veri setinin sahip olduğu varyasyonun büyük bir kısmını içermektedir.
 
@@ -192,7 +181,7 @@ Kümülatif varyans grafiği;
 plot(cumsum(pca_res$sdev^2 / sum(pca_res$sdev^2)), type="b", xlab="PC", ylab="Cumulative Proportion")
 ```
 
-## PCA analizini görselleştirme
+### PCA analizini görselleştirme
 
 Bu adımda ise PCA analizini görselleştirelim. Bizim için önemli olan ilk üç eksen. Dolayısıyla, öncelikle ilk üç eksendeki değerleri `pca_res` içerisinden alalım. Ayrıca, örneklerin doku bilgilerini de elde edelim. Bu sayede, grafikleki noktaları, örneklerin doku bilgilerine göre boyayabiliriz.
 
@@ -221,7 +210,7 @@ Son olarak PC2 ve PC3:
 ggplot(data = PC_data, aes(x=PC2, y=PC3, color=Tissue)) + geom_point()
 ```
 
-## Bray Curtis Analizi
+### Bray Curtis Analizi
 
 Bray curtis analizi, iki farklı bölge arasındaki tür popülasyonlarındaki farklılıkları ölçmek için kullanılır.
 
@@ -278,6 +267,16 @@ ggplot(data = bray_curtis_pcoa_df, aes(x=PCOA2, y=PCOA3, color=Tissue)) +
   geom_point() +
   labs(title = "Bray-Curtis PCoA")
 ```
+
+```{r}
+g <- otu_data_normalized
+colnames(g) <- sample_data$Tissue
+bray_curtis_dist <- vegdist(t(g), method = "bray")
+plot(hclust(bray_curtis_dist))
+```
+
+
+
 
 ## Alfa Çeşitliliği
 
@@ -497,7 +496,17 @@ Son olarak ısı haritasını elde edelim ve bu genleri kaydedelim.
 ```{r}
 library(pheatmap)
 colnames(logsig)<-sample_data_subset$Tissue
-pheatmap(mat = logsig)
+pheatmap(mat = logsig, cluster_cols = F)
 
-#write.table(file = "significant_genes.csv", sep = ";", quote = FALSE, x = m, dec = ",")
+write.table(file = "significant_bacteria.csv", sep = ";", quote = FALSE, x = m, dec = ",")
 ```
+
+```{r}
+
+f <- sample_data_subset[order(sample_data_subset$Tissue),]
+l<-logsig[,f$Sample]
+colnames(l)<-f$Tissue
+pheatmap(l, cluster_cols = F)
+
+```
+
