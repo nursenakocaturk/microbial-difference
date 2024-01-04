@@ -42,7 +42,6 @@ otu_data <- read.table(file = "data/krakenuniq_abundance_matrix.txt", header = T
 dim(otu_data)
 ```
 
-
 Şimdi de, örneklerin sahip oldukları doku bilgilerini yükleyelim:
 
 ```{r}
@@ -99,7 +98,6 @@ dds <- DESeq(dds)
 otu_data_normalized <- counts(dds, normalized = TRUE)
 ```
 
-
 Elimizdeki mikrobiyal çokluk matrisini öncelikle normalize etmemiz gereklidir. Çünkü her DNA kütüphanesi farklı okuma derinliğine (toplam okuma sayısı) sahiptir.
 
 İlk olarak, bütun sutunların (yani her örneğin) toplam değerlerini elde edelim. Bu bize her örnekten elde edilen fastq dosyaının okuma derinliğini verecektir
@@ -128,7 +126,6 @@ colnames(g) <- sample_data$Tissue
 plot(hclust(dist(x = t(g), method = "euclidean")))
 
 ```
-
 
 ## Birincil öz bileşen tahlili (PCA)
 
@@ -320,7 +317,6 @@ library("vegan")
 
 `otu_data` verisindeki alfa çeşitliliğini hesaplayalım. Bu çeşitliliğin indeksleri olan shannon, simpson ve invsimpson değerlerini bulalım:
 
-
 ```{r}
 shannon <- diversity(x = t(otu_data_normalized), index = 'shannon')
 
@@ -397,7 +393,7 @@ test.shannon$p.value < 0.001
 
 Bu iki popülasyonun ortamalarının aynı olma ihtimalinin yüksek olduğunu görüyoruz. Bu nedenle sıfır hipotezini reddedmiyoruz.
 
-#### Test Simpson
+#### Simpson Çeşitliliği için
 
 Dentin ve cementum dokulaının, simpson değerleri anlamlı olarak birbirinden farklı mı?
 
@@ -413,9 +409,9 @@ test.simpson <- t.test(x = alpha$Simpson[alpha$Tissue == "Dentin"],
 test.simpson
 ```
 
-#### Test Invsimpson
+#### Test Invsimpson Çeşitliliği için
 
-Dentin ve cementum dokulaının, invsimpson değerleri anlamlı olarak birbirinden farklı mı?
+Dentin ve cementum dokularının, invsimpson değerleri anlamlı olarak birbirinden farklı mı?
 
 ```{r}
 ggplot(data = alpha, aes(x = Invsimpson)) + geom_density(aes(fill = Tissue), alpha = 0.7)
@@ -429,12 +425,11 @@ test.invsimpson <- t.test(x = alpha$Invsimpson[alpha$Tissue == "Dentin"],
 test.invsimpson
 ```
 
-## Dentin ve Cementum arasında anlamlıd değişen mikroplar
+## Dentin ve Cementum arasında anlamlı değişen mikroplar
 
 Sadece Dentin ve Cementum örneklerini alıp yeni bir Deseq verisi oluşturalım
 
 ```{r}
-
 sample_data_subset <- sample_data[sample_data$Tissue %in% c("Dentin", "Cementum"),]
 otu_data_subset <- otu_data[,rownames(sample_data[sample_data$Tissue %in% c("Dentin", "Cementum"),])]
 
@@ -447,7 +442,6 @@ Hangi mikroplar anlamlı değişmi?
 ```{r}
 dds_results <- results(dds)
 dds_results <- dds_results[!is.na(dds_results$padj),]
-
 ```
 
 Normalize edilmiş p değeri 0.001'den küçük olanlar
@@ -467,6 +461,8 @@ result <- data.frame(Sample = rownames(significant),
 
 ```
 
+Volcano plot ile anlamlı değişen bakterileri inceleyelim:
+
 ```{r}
 maxFold<-max(dds_results$log2FoldChange[!is.na(dds_results$log2FoldChange)])
 minFold<-min(dds_results$log2FoldChange[!is.na(dds_results$log2FoldChange)])
@@ -477,6 +473,7 @@ with(subset(dds_results, padj< alpha), points(log2FoldChange, -log10(pvalue), pc
 with(subset(dds_results, padj< alpha & abs(log2FoldChange)>2), points(log2FoldChange, -log10(pvalue), pch=20, col="orange"))
 ```
 
+Şimdi de alpha değerine göre 2 kat fazla artan ya da 2 kattan fazla azalan genleri belirleyip hem bir heatmap yapalım hem de bu bakterileri yazalım:
 
 ```{r}
 ups <- subset(x = dds_results, subset = log2FoldChange > 2 & padj < alpha)
@@ -490,13 +487,12 @@ Bu genlerin sahip olduğu normalize edilmiş anlatım verilerini, ısı haritas�
 Burada dikkat edilmesi gereken şey ise $log2(0) = -Inf$ olması. Bu yüzden $-Inf$ değerlerini, 0 olarak düzeltmemiz gerek. Bu sayede anlatımı 0 olan genleri de ısı matrisinde gösterebiliriz:
 
 ```{r}
-
 sig <- otu_data_subset[m$OTU,]
 logsig <- log2(sig)
 logsig[logsig == -Inf]<-0
 ```
 
-Son olarakısı haritasını elde edelim ve bu genleri kaydedelim.
+Son olarak ısı haritasını elde edelim ve bu genleri kaydedelim.
 
 ```{r}
 library(pheatmap)
@@ -505,4 +501,3 @@ pheatmap(mat = logsig)
 
 #write.table(file = "significant_genes.csv", sep = ";", quote = FALSE, x = m, dec = ",")
 ```
-
