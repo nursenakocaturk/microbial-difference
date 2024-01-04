@@ -352,19 +352,17 @@ Dentin ve cementum arasındaki alfa çeşitlilikliliklerde anlamlı bir fark var
 
 t-testi, iki grubun ortalamaları arasında anlamlı bir fark olup olmadığını test etmek için kullanılabilir.
 
+Dentin ve cementum dokularındaki shannon değer ortalamaları çok fazla olmamakla birlikte, birbirinden farklı değerler taşımaktadır. Bu farkın anlamlı olup olmadığını tespit etmek için 't.test' kullanabiliriz:
+
 #### Shannon çeşitlilği için
 
 Dentin ve cementum dokulaının, shannon değerleri anlamlı olarak birbirinden farklı mı?
 
 ```{r}
-ggplot(data = alpha, aes(x = Shannon)) + geom_density(aes(fill = Tissue), alpha = 0.5)
+ggplot(data = alpha, aes(x = Shannon)) + geom_density(aes(fill = Tissue), alpha = 0.7)
 ```
 
-Bunu göstermek için iki farklı dağılım olmalıdır:
-
 Dentin ve cementum dokularındaki shannon değerlerini elde edelim:
-
-Dentin ve cementum dokularındaki shannon değer ortalamaları çok fazla olmamakla birlikte, birbirinden farklı değerler taşımaktadır. Bu farkın anlamlı olup olmadığını tespit etmek için 't.test' kullanabiliriz:
 
 ```{r}
 test.shannon <- t.test(x = alpha$Shannon[alpha$Tissue == "Dentin"], 
@@ -464,11 +462,11 @@ minFold<-min(dds_results$log2FoldChange[!is.na(dds_results$log2FoldChange)])
 
 par(mfrow=c(1,1))
 with(dds_results, plot(log2FoldChange, -log10(pvalue), pch=20, main="Volcano plot", xlim=c(minFold, maxFold)))
-with(subset(dds_results, padj< alpha), points(log2FoldChange, -log10(pvalue), pch=20, col="blue"))
-with(subset(dds_results, padj< alpha & abs(log2FoldChange)>2), points(log2FoldChange, -log10(pvalue), pch=20, col="orange"))
+with(subset(dds_results, padj< alpha), points(log2FoldChange, -log10(pvalue), pch=20, col="gray"))
+with(subset(dds_results, padj< alpha & abs(log2FoldChange)>2), points(log2FoldChange, -log10(pvalue), pch=20, col="purple"))
 ```
 
-Şimdi de alpha değerine göre 2 kat fazla artan ya da 2 kattan fazla azalan genleri belirleyip hem bir heatmap yapalım hem de bu bakterileri yazalım:
+Şimdi de alpha değerine göre 2 kat fazla artan ya da 2 kattan fazla azalan bakterileri belirleyip hem bir heatmap yapalım hem de bu bakterileri yazalım:
 
 ```{r}
 ups <- subset(x = dds_results, subset = log2FoldChange > 2 & padj < alpha)
