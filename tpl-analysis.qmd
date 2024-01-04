@@ -120,6 +120,16 @@ Derinlikler aynı değil. O yüzden, çokluk tablosunu, toplam okuma derinliğin
 otu_data <- scale(otu_data,center = F, scale = colSums(otu_data))
 ```
 
+## Clustering
+
+```{r}
+g <- otu_data_normalized
+colnames(g) <- sample_data$Tissue
+plot(hclust(dist(x = t(g), method = "euclidean")))
+
+```
+
+
 ## Birincil öz bileşen tahlili (PCA)
 
 PCA, büyük boyutlu olan verileri küçük boyuta indirgemek için kullanılan yaklaşımlardan biridir. Bütün eksenler aynı anda görselleştirilemez. PCA, çok boyutlu veriyi alarak üç boyuta indirgemektedir. İlk üç eksen veri setinin sahip olduğu varyasyonun büyük bir kısmını içermektedir.
@@ -443,7 +453,8 @@ dds_results <- dds_results[!is.na(dds_results$padj),]
 Normalize edilmiş p değeri 0.001'den küçük olanlar
 
 ```{r}
-significant <- dds_results[dds_results$padj < 0.001, ]
+alpha <- 0.01
+significant <- dds_results[dds_results$padj < alpha, ]
 ```
 
 Elimizdeki sonucu bir veri çerçevesine aktaralım:
@@ -456,5 +467,42 @@ result <- data.frame(Sample = rownames(significant),
 
 ```
 
+```{r}
+maxFold<-max(dds_results$log2FoldChange[!is.na(dds_results$log2FoldChange)])
+minFold<-min(dds_results$log2FoldChange[!is.na(dds_results$log2FoldChange)])
 
+par(mfrow=c(1,1))
+with(dds_results, plot(log2FoldChange, -log10(pvalue), pch=20, main="Volcano plot", xlim=c(minFold, maxFold)))
+with(subset(dds_results, padj< alpha), points(log2FoldChange, -log10(pvalue), pch=20, col="blue"))
+with(subset(dds_results, padj< alpha & abs(log2FoldChange)>2), points(log2FoldChange, -log10(pvalue), pch=20, col="orange"))
+```
+
+
+```{r}
+ups <- subset(x = dds_results, subset = log2FoldChange > 2 & padj < alpha)
+downs <- subset(x = dds_results, subset = log2FoldChange < -2 & padj < alpha)
+m <- rbind(ups,downs)
+m$OTU <- rownames(m)
+```
+
+Bu genlerin sahip olduğu normalize edilmiş anlatım verilerini, ısı haritası ile görselleştirmek için, normalize edilmiş matris içinden elde edelim. Daha sonra `log2` fonkisyonu ile 2'nin katlarına transforme edelim.
+
+Burada dikkat edilmesi gereken şey ise $log2(0) = -Inf$ olması. Bu yüzden $-Inf$ değerlerini, 0 olarak düzeltmemiz gerek. Bu sayede anlatımı 0 olan genleri de ısı matrisinde gösterebiliriz:
+
+```{r}
+
+sig <- otu_data_subset[m$OTU,]
+logsig <- log2(sig)
+logsig[logsig == -Inf]<-0
+```
+
+Son olarakısı haritasını elde edelim ve bu genleri kaydedelim.
+
+```{r}
+library(pheatmap)
+colnames(logsig)<-sample_data_subset$Tissue
+pheatmap(mat = logsig)
+
+#write.table(file = "significant_genes.csv", sep = ";", quote = FALSE, x = m, dec = ",")
+```
 
