@@ -410,7 +410,7 @@ test.simpson <- t.test(x = alpha$Simpson[alpha$Tissue == "Dentin"],
 test.simpson
 ```
 
-#### Test Invsimpson Çeşitliliği için
+#### Invsimpson Çeşitliliği için
 
 Dentin ve cementum dokularının, invsimpson değerleri anlamlı olarak birbirinden farklı mı?
 
