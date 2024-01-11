@@ -112,6 +112,8 @@ otu_data <- scale(otu_data,center = F, scale = colSums(otu_data))
 
 ### Kümeleme
 
+Dokular arasındaki hiyerarşik kümelenmeyi gösteren bir diyagram oluşturalım:
+
 ```{r}
 g <- otu_data_normalized
 colnames(g) <- sample_data$Tissue
@@ -270,6 +272,8 @@ ggplot(data = bray_curtis_pcoa_df, aes(x=PCOA2, y=PCOA3, color=Tissue)) +
   geom_point() +
   labs(title = "Bray-Curtis PCoA")
 ```
+
+Bray-curtis sonuçlarına göre dokuların hiyerarşik kümelenme sonucu:
 
 ```{r}
 g <- otu_data_normalized
